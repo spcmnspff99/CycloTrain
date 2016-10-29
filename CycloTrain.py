@@ -1,7 +1,7 @@
 import glob, os, sys
 from optparse import OptionParser
 
-from gb580_device import GB500, ExportFormat, Utilities
+from gb580 import GB500, ExportFormat, Utilities
 
 gb = GB500()
 
