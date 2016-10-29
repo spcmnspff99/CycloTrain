@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.0"
+	creator="code.google.com/p/GH615"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.topografix.com/GPX/1/0"
+	xsi:schemaLocation="http://www.topografix.com/GPX/1/0
+						http://www.topografix.com/GPX/1/0/gpx.xsd">
+
+<% for track in tracks %>
+<trk>
+	<trkseg>
+	<% for trackpoint in track.trackpoints %>
+		<trkpt lat="$trackpoint.latitude" lon="$trackpoint.longitude">
+			<ele>$trackpoint.altitude</ele>
+			<speed>$trackpoint.speed</speed>
+			<time>$trackpoint.date.isoformat()</time>
+		</trkpt>
+	<% endfor %>
+	</trkseg>
+</trk>
+<% endfor %>
+
+</gpx>

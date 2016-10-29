@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <FitnessWorkbook xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.zonefivesoftware.com/xmlschemas/FitnessLogbook/v1">
+  
+  <AthleteLog>
+  <% for track in tracks %>
+    <Activity StartTime="$track.date.isoformat()">
+      <Metadata Source="Globalsat GH615M" Created="$track.date.isoformat()" Modified="$track.date.isoformat()" />
+      <Duration TotalSeconds="$track.duration.seconds" /> 
+      <Distance TotalMeters="$track.distance" /> 
+      <Calories TotalCal="$track.calories" /> 
+      <Track StartTime="$track.date.isoformat()">
+  	  <% for trackpoint in track.trackpoints %>
+        <pt tm="$trackpoint.timeFromStart.seconds" lat="$trackpoint.latitude" lon="$trackpoint.longitude" ele="$trackpoint.altitude" hr="$trackpoint.heartrate" />
+	  <% endfor %>
+      </Track>
+      
+      <% if hasattr(track, 'laps') %>
+      <Laps>
+      <% for lap in track.laps %>
+      <Lap StartTime="$lap.start.isoformat()" DurationSeconds="$lap.duration.seconds">
+      	<Distance>$lap.distance</Distance>
+      	<Calories>$lap.calories</Calories>
+      </Lap>
+      <% endfor %>
+      </Laps>
+      <% endif %>
+    
+    </Activity>
+  <% endfor %>
+  </AthleteLog>
+</FitnessWorkbook>

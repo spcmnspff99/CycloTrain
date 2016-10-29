@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+
+<gpx version="1.1"
+creator="Garmin Edge 800"
+xmlns="http://www.topografix.com/GPX/1/1"
+xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+
+<% for i, track in enumerate(tracks) %>
+<trk>
+	<number>$i</number>
+	<trkseg>
+	<% for trackpoint in track.trackpoints %>
+	<trkpt lat="$trackpoint.latitude" lon="$trackpoint.longitude">
+			<time>$trackpoint.date.isoformat()</time>
+			<ele>$trackpoint.altitude</ele>
+			<speed>$trackpoint.speed</speed>
+			<extensions>
+				<gpxtpx:TrackPointExtension>
+					<gpxtpx:hr>$trackpoint.heartrate</gpxtpx:hr>
+					<gpxtpx:cad>$trackpoint.cadence</gpxtpx:cad>
+					<gpxtpx:power>$trackpoint.power</gpxtpx:power>
+					<gpxtpx:atemp>$trackpoint.temp</gpxtpx:atemp>
+				</gpxtpx:TrackPointExtension>
+			</extensions>
+		</trkpt>
+	<% endfor %>
+</trkseg>
+</trk>
+<% endfor %>
+
+</gpx>

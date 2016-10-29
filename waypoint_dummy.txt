@@ -1,0 +1,6 @@
+[
+{'latitude': '52.223657', 'altitude': 51, 'type': 222, 'longitude':'6.905303', 'title': 'test'}, 
+{'latitude': '52.174810', 'altitude': 51,'type': 1, 'longitude': '6.834910', 'title': 'tst26'}, 
+{'latitude':'52.176740', 'altitude': 51, 'type': 1, 'longitude': '6.830130', 'title':'tst27'}, 
+{'latitude': '52.176670', 'altitude': 51, 'type': 1,'longitude': '6.829970', 'title': 'tst28a'}
+]

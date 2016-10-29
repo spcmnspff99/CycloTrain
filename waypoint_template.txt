@@ -1,0 +1,11 @@
+[
+<% for waypoint in waypoints %>
+{
+'latitude':$waypoint.latitude,
+'longitude':$waypoint.longitude,
+'altitude':$waypoint.altitude,
+'title':'$waypoint.title',
+'type':$waypoint.type
+}
+<% endfor %>
+]

@@ -1,0 +1,4 @@
+#please see exportTemplates/pre/nmea_rmc.py
+<% for trackpoint in track.trackpoints %>
+$GPRMC,$trackpoint.status,$trackpoint.date.strftime("%H%M%S"),$trackpoint.latitude_dms,$trackpoint.longitude_dms,$trackpoint.speed_knots,$trackpoint.angle,$trackpoint.date.strftime("%d%m%y"),$trackpoint.magnetic*$trackpoint.checksum
+<% endfor %>
