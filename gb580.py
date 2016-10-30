@@ -504,7 +504,7 @@ class SerialInterface():
                 self.port = self.config.get("serial", "comport")
                 self.logger.debug("Virtual serial port not found. Reverting to config.ini: " + self.port)
         try:
-            self.serial = serial.Serial(port=self.port, baudrate=self.config.get("serial", "baudrate"), timeout=self.config.getint("serial", "timeout"))
+            self.serial = serial.Serial(port=self.port, baudrate=self.config.get("serial", "baudrate"), timeout=self.config.getint("serial", "timeout"), xonxoff=0, rtscts=1)
             self.logger.debug("serial connection on " + self.serial.portstr)
         except serial.SerialException:
             self.logger.critical("error establishing serial connection")
@@ -531,22 +531,26 @@ class SerialInterface():
         #except:
         #    raise GB500SerialException
 
-    def _readSerial(self, size = 2070):
-        #if self.serial.inWaiting() > 0:
-        #    data = Utilities.chr2hex(self.serial.read(self.serial.inWaiting()))
-        #else:
+    def _readSloppy(self, size = 2070):
         data = Utilities.chr2hex(self.serial.read(size))
         self.logger.debug("serial port returned: %s" % data if len(data) < 30 else "%s... (truncated)" % data[:30])
         return data
 
-    def _readTrackPoints(self, size = 2070):
+    def _readPrecise(self):
+	# find the payload and read that many bytes 1 at a time
+	# much faster than guessing at it and waiting for the timeout
+	# byte by byte improves flow control/buffer overruns in linux	
         raw = ''
         data = Utilities.chr2hex(self.serial.read(3))
         payload = int(data[2:6], 16)
         
-        for i in range (0, payload -1):
-                raw += self.serial.read(1)
+	if payload > 0:
+            for i in range (0, payload):
+                raw += self.serial.read()
 
+	# read the last checksum byte
+        raw += self.serial.read()
+        
         data += Utilities.chr2hex(raw)
         self.logger.debug("serial port returned: %s" % data if len(data) < 30 else "%s... (truncated)" % data[:30])
         return data
@@ -556,7 +560,7 @@ class SerialInterface():
         while True:
             tries += 1
             self._writeSerial(command, *args, **kwargs)
-            data = self._readSerial()
+            data = self._readPrecise()
             if data:
                 return data
             else:
@@ -680,7 +684,7 @@ class GB500(SerialInterface):
     
     def getAllTrackIds(self):
         allTracks = self.getTracklist()
-        return [track.id for track in allTracks]
+        return [track.pointer for track in allTracks]
     
     def getAllTracks(self):
         return self.getTracks(self.getAllTrackIds())
@@ -689,14 +693,14 @@ class GB500(SerialInterface):
     def getTracks(self, trackIds):
         raise NotImplemented('This is an abstract method, please instantiate a subclass')
     
-    def exportTracks(self, tracks, format = None, path = None, **kwargs):
+    def exportTracks(self, track, format = None, path = None, **kwargs):
         if format is None:
             format = self.config.get("export", "default")
         if path is None:
             path = os.path.abspath(Utilities.getAppPrefix(self.config.get('export', 'path')))
         
         ef = ExportFormat(format)
-        ef.exportTracks(tracks, path, **kwargs)
+        ef.exportTrack(track, path, **kwargs)
     
     def importTracks(self, files, **kwargs):        
         if "path" in kwargs:
@@ -726,7 +730,7 @@ class GB500(SerialInterface):
         self._writeSerial('formatTracks')
         #wait long for response
         time.sleep(10)
-        response = self._readSerial()
+        response = self._readSloppy()
         
         if response == '79000000':
             self.logger.info('format tracks successful')
@@ -793,7 +797,7 @@ class GB500(SerialInterface):
     def formatWaypoints(self):
         self._writeSerial('formatWaypoints')
         time.sleep(10)
-        response = self._readSerial()
+        response = self._readSloppy()
         
         if response == '75000000':
             self.logger.info('deleted all waypoints')
@@ -878,15 +882,15 @@ class GB580(GB500):
             pass
         
     @serial_required
-    def getTracks(self, trackPtr, trackPts):
+    def getTracks(self, trackPtr):
         checksum = Utilities.checkersum("05800100%s" % (trackPtr))
         self._writeSerial('getTracks', **{'trackPtr':trackPtr, 'checksum':checksum})                    
         newtrack = None
-        tracks = []
         i = 0
+        os.system('setterm -cursor off')
         
         while True:
-            data = self._readSerial(2500)
+            data = self._readPrecise()
             time.sleep(0)
             if data != '8A000000':
 
@@ -894,40 +898,35 @@ class GB580(GB500):
                 if len(data) == 136:
                     self.logger.debug('initalizing new track')
                     #save the old track if it exists and instantiate a new one
-                    if newtrack is not None:
-                        tracks.append(newtrack)
                     newtrack = TrackWithLaps().fromHex(data[6:-2], self.timezone)
                     i = 1
 
-               #new laps data session is always after train header
+                #new laps data session is always after train header
                 elif i == 1:
                     self.logger.debug('adding laps')
                     newtrack.addLapsFromHex(data[54:-2])
                     i = 2
 
-               #new points data session?
+                #new points data session?
                 else:
                     self.logger.debug('adding trackpoints from new session')
-                    #i+=len(data[54:-2])/32
-                    #self.logger.debug(data[0:18])
-                    #self.logger.debug(data[54:-2])
                     newtrack.addTrackpointsFromHex(data[54:-2])
 
                 # progress bars are nice
-                #progress = int(100 * i/trackPts)
-                #print '\r[{0}] {1}%'.format('#'*(progress/2)+ ' '*((100-progress)/2), progress),
+                progress = int(100 * len(newtrack.trackpoints)/newtrack.trackpointCount)
+                print '\r[{0}] {1}%'.format('#'*(progress/2)+ '-'*((100-progress)/2), progress),
                 self._writeSerial('requestNextTrackSegment')
 
             else:
                 #we are done, do maintenance work here
-                tracks.append(newtrack)
-                for track in tracks:
-                    for lap in track.laps:
-                        lap.calculateCoordinates(track.trackpoints)
+                os.system('setterm -cursor on')
+                print
+                for lap in newtrack.laps:
+                    lap.calculateCoordinates(newtrack.trackpoints)
                 break        
 
-        self.logger.info('number of tracks %d' % len(tracks))
-        return tracks
+        self.logger.debug('added 1 track')
+        return newtrack
     
     @serial_required
     def setTracks(self, tracks):        

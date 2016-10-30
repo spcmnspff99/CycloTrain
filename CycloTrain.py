@@ -1,7 +1,8 @@
 import glob, os, sys
 from optparse import OptionParser
 
-from gb580 import GB500, ExportFormat, Utilities
+from gb580 import GB500, ExportFormat
+from Utilities import Utilities
 
 gb = GB500()
 
@@ -107,10 +108,11 @@ What do you want to do?\n\
         #    merge = True if merge == "y" else False
         #print headers[index-1].pointer       
         #print "Retreiving track %s" % index
-        track = gb.getTracks(headers[index-1].pointer, headers[index-1].trackpointCount)
+        track = gb.getTracks(headers[index-1].pointer)
         
         gb.exportTracks(track, format, merge = merge)
-        
+                
+
     elif command.startswith("c"):
         print "Export all tracks"
         if command == "c?":
