@@ -15,3 +15,4 @@
 13.) reorganize module layout to accomdate more devices  DONE
 14.) Fix/test exports DONE
 15.) Review CL params
+16.) Stara auto upload has to check the export format.
