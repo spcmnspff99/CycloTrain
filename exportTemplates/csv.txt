@@ -1,4 +1,4 @@
 latitude, longitude, altitude, speed, interval, date, heartrate
 <% for trackpoint in track.trackpoints %>
-$trackpoint.latitude, $trackpoint.longitude, $trackpoint.altitude, $trackpoint.speed, $trackpoint.interval.seconds, $trackpoint.date.strftime("%Y-%m-%dT%H:%M:%SZ"), $trackpoint.heartrate
+$trackpoint.latitude, $trackpoint.longitude, $trackpoint.altitude, $trackpoint.speed, $trackpoint.interval, $trackpoint.date.strftime("%Y-%m-%dT%H:%M:%SZ"), $trackpoint.heartrate
 <% endfor %>

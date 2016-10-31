@@ -4,14 +4,16 @@
   <Activities>
     <Activity Sport="Biking">
       <Id>$track.date.isoformat()</Id>
-      <Lap StartTime="$track.date.strftime("%Y-%m-%dT%H:%M:%Sz")">
-        <TotalTimeSeconds>$track.duration.seconds</TotalTimeSeconds>
-        <DistanceMeters>$track.distance</DistanceMeters>
-        <Calories>$track.calories</Calories>
+      
+      <% for i, lap in enumerate(track.laps) %>
+      <Lap StartTime="$lap.start.strftime("%Y-%m-%dT%H:%M:%Sz")">
+        <TotalTimeSeconds>$lap.duration.seconds</TotalTimeSeconds>
+        <DistanceMeters>$lap.distance</DistanceMeters>
+        <Calories>$lap.calories</Calories>
         <Intensity>Active</Intensity>
         <TriggerMethod>Manual</TriggerMethod>
         <Track>
-          <% for trackpoint in track.trackpoints %>
+          <% for trackpoint in lap.trackpoints %>
           <Trackpoint>
             <Time>$trackpoint.date.strftime("%Y-%m-%dT%H:%M:%Sz")</Time>
             <Position>
@@ -20,13 +22,11 @@
             </Position>
             <AltitudeMeters>$trackpoint.altitude</AltitudeMeters>
             <HeartRateBpm>$trackpoint.heartrate</HeartRateBpm>
-            <runcadence>$trackpoint.cadence</runcadence>
-            <watts>$trackpoint.power</watts>
-            
           </Trackpoint>
           <% endfor %>
         </Track>
       </Lap>
+      <% endfor %>
 
       <Creator xsi:type="Device_t">
         <Name>Globalsat GH600</Name>

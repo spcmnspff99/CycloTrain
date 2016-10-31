@@ -10,6 +10,7 @@ xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/
 <% for i, track in enumerate(tracks) %>
 <trk>
 	<number>$i</number>
+
 	<trkseg>
 	<% for trackpoint in track.trackpoints %>
 	<trkpt lat="$trackpoint.latitude" lon="$trackpoint.longitude">

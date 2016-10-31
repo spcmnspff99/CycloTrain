@@ -38,9 +38,10 @@ def choose():
 What do you want to do?\n\
 ------TRACKS-------\n\
 [a]  = get list of all tracks\n\
-[b]  = select and export tracks (to default format) | [b?] to select format or [b <format>]\n\
-[c]  = export all tracks (to default format)        | [c?] to select format or [c <format>]\n\
-[d]  = upload tracks\n\
+[b]  = select and export tracks (to default format)\n\
+[b?] = select format or [b <format>]\n\
+[c]  = export all tracks (to default format)\n\
+[c?] = select format or [c <format>]\n\
 -----WAYPOINTS-----\n\
 [e]  = download waypoints\n\
 [f]  = upload waypoints\n\
@@ -66,23 +67,6 @@ What do you want to do?\n\
             headers = tracklist()
         
         pick = raw_input("enter track index ").strip()
-        #adds the slice notation for selecting tracks, i.e. [2:4] or [:-4] or [3]
-        #if ":" in picks:
-        #    lower, upper = picks.split(':')
-        #    try:
-        #        lower = int(lower)
-        #    except ValueError:
-        #        lower = None
-        #    try:
-        #        upper = int(upper)
-        #    except ValueError:
-        #        upper = None
-
-        #    trackIds = gb.getAllTrackIds()[lower:upper]
-        #elif "-" in picks:
-        #    trackIds = [gb.getAllTrackIds()[int(picks)]]
-        #else:
-        #    trackIds = picks.split(' ')
 
         trackIndex = pick
         try:
@@ -103,15 +87,8 @@ What do you want to do?\n\
         
         ef = ExportFormat(format)
         merge = False
-        #if ef.hasMultiple and len(trackIds) > 1:
-        #    merge = raw_input("Do you want to merge all tracks into a single file? [y/n]: ").strip()
-        #    merge = True if merge == "y" else False
-        #print headers[index-1].pointer       
-        #print "Retreiving track %s" % index
-        track = gb.getTracks(headers[index-1].pointer)
-        
-        gb.exportTracks(track, format, merge = merge)
-                
+        track = gb.getTrack(headers[index-1].pointer)
+        gb.exportTrack(track, format, merge = merge)
 
     elif command.startswith("c"):
         print "Export all tracks"
@@ -124,27 +101,9 @@ What do you want to do?\n\
             print "FYI: Exporting to default format '%s' (see config.ini)" % format
         
         tracks = gb.getAllTracks()
-        results = gb.exportTracks(tracks, format)
+	for track in tracks:
+            results = gb.exportTrack(track, format)
         print 'exported %i tracks to %s' % (len(tracks), format)
-        
-    elif command == "d":
-        print "Upload Tracks"
-        files = glob.glob(os.path.join(Utilities.getAppPrefix(), "import", "*.gpx"))
-        for i,format in enumerate(files):
-            (filepath, filename) = os.path.split(format)
-            #(shortname, extension) = os.path.splitext(filename)
-            print '[%i] = %s' % (i, filename)
-        
-        fileId = raw_input("enter number(s) [space delimited] ").strip()
-        fileIds = fileId.split(' ');
-        
-        filesToBeImported = []
-        for fileId in fileIds:
-            filesToBeImported.append(files[int(fileId)])
-                    
-        tracks = gb.importTracks(filesToBeImported)        
-        results = gb.setTracks(tracks)
-        print 'successfully uploaded tracks ', str(results)
         
     elif command == "e":
         print "Download Waypoints"
@@ -172,8 +131,8 @@ What do you want to do?\n\
     
     elif command == "i":
         unit = gb.getUnitInformation()
-        print "* %s waypoints on watch" % unit['waypoint_count']
-        print "* %s trackpoints on watch" % unit['trackpoint_count']
+        print "* %s waypoints on device" % unit['waypoint_count']
+        print "* %s trackpoints on device" % unit['trackpoint_count']
     
     elif command == "x":
         print prompt_format()
@@ -249,12 +208,13 @@ def main():
             if not options.tracks:
                 parser.error("use option '--track' to select track")
                 
-            tracks = gb.getTracks(options.tracks)
-            gb.exportTracks(tracks, gb.config.get('export', 'default'), gb.config.get('export', 'path'), merge = options.merge)
+            track = gb.getTrack(options.track)
+            gb.exportTrack(track, gb.config.get('export', 'default'), gb.config.get('export', 'path'), merge = options.merge)
             
         elif args[0] == "c":        
             tracks = gb.getAllTracks()
-            gb.exportTracks(tracks, gb.config.get('export', 'default'), gb.config.get('export', 'path'), merge = options.merge)
+            for track in tracks:
+                gb.exportTrack(track, gb.config.get('export', 'default'), gb.config.get('export', 'path'), merge = options.merge)
             
         elif args[0] == "d":
             if not options.input:

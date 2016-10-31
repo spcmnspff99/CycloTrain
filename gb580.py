@@ -25,7 +25,7 @@ class Coordinate(Decimal):
             return self
         else:
             raise GB500ParseException(self.__class__.__name__, len(hex), 8)
-  
+
 class Point(object):
     def __init__(self, latitude = 0, longitude = 0):
         self.latitude  = Coordinate(latitude)
@@ -64,18 +64,7 @@ class Trackpoint(Point):
         
     def __str__(self):
         return "(%f, %f, %i, %i, %i, %i)" % (self.latitude, self.longitude, self.altitude, self.speed, self.heartrate, self.interval, self.cadence, self.power, self.temp)
-    
-    def __hex__(self):            
-        return "%(latitude)s%(longitude)s%(altitude)s%(speed)s%(heartrate)s%(interval)s" % {
-            'latitude':   hex(self.latitude),
-            'longitude':  hex(self.longitude),
-            'altitude':   Utilities.dec2hex(self.altitude,4),
-            'speed':      Utilities.dec2hex(self.speed,4) * 100,
-            'heartrate':  Utilities.dec2hex(self.heartrate,2),
-            'interval':   Utilities.dec2hex(self.interval.microseconds/1000,4),
-            
-        }
-        
+
     def fromHex(self, hex):
         if len(hex) == 64:
             self.latitude   = Coordinate().fromHex(Utilities.swap(hex[0:8]))
@@ -178,18 +167,19 @@ class Waypoint(Point):
 
 class Lap(object):
     def __init__(self, start = datetime.datetime.now(), end = datetime.datetime.now(), duration = datetime.timedelta(), distance = 0, calories = 0,
-                 startPoint = Point(0,0), endPoint = Point(0,0)):
+                 avgHeartrate = 0, avgCadence = 0,startPoint = Point(0,0), endPoint = Point(0,0)):
         self.start        = start
         self.end          = end
         self.duration     = duration
         self.distance     = distance
         self.calories     = calories
-        
+        self.avgHeartrate = avgHeartrate
+        self.avgCadence   = avgCadence
         self.startPoint   = startPoint
         self.endPoint     = endPoint
         
     def __str__(self):
-        return "%s %s %s %08i %08i" % (self.start, self.end, self.duration, self.distance, self.calories)	
+        return "%s %s %s %08i %06i %04i %04i" % (self.start, self.end, self.duration, self.distance, self.calories,self.avgHeartrate, self.avgCadence)
 
     def __getitem__(self, attr):
         return getattr(self, attr)
@@ -200,7 +190,8 @@ class Lap(object):
             self.__elapsed = Utilities.hex2dec(hex[8:16])
             self.distance = Utilities.hex2dec(hex[16:24])
             self.calories = Utilities.hex2dec(hex[24:28])
- 
+            self.avgHeartrate = Utilities.hex2dec(hex[42:44])
+            self.avgCadence = Utilities.hex2dec(hex[52:56])
             return self
         else:
             print hex
@@ -257,8 +248,8 @@ class TrackFileHeader(object):
             self.distance = round(self.distance * 0.001, 1)
         return self
         
-class Track(object):    
-    def __init__(self, date = datetime.datetime.utcnow(), duration = datetime.timedelta(), distance = 0, calories = 0, topspeed = 0, climb = 0, trackpointCount = 0):
+class TrackWithLaps(object):
+    def __init__(self, date = datetime.datetime.utcnow(), duration = 0, distance = 0, calories = 0, topspeed = 0, climb = 0, trackpointCount = 0, lapCount = 0):
         self.date            = date
         self.duration        = duration
         self.distance        = distance
@@ -267,109 +258,15 @@ class Track(object):
         self.climb           = climb
         self.trackpointCount = trackpointCount
         self.trackpoints     = []
-    
-    def __getitem__(self, attr):
-        return getattr(self, attr)
-    
-    def __str__(self):
-        return "%s %08i %08i %08i %08i %08i %04i" % (self.date, self.distance, self.calories, self.topspeed, self.climb, self.trackpointCount, 0)
-
-    def __hex__(self):
-        date = Utilities.dec2hex(self.date.strftime('%y'),2) + Utilities.dec2hex(self.date.strftime('%m'),2) + \
-               Utilities.dec2hex(self.date.strftime('%d'),2) + Utilities.dec2hex(self.date.strftime('%H'),2) + \
-               Utilities.dec2hex(self.date.strftime('%M'),2) + Utilities.dec2hex(self.date.strftime('%S'),2)
-               
-        infos = Utilities.dec2hex(self.duration,8) + Utilities.dec2hex(self.distance,8) + \
-                Utilities.dec2hex(self.calories,4) + Utilities.dec2hex(self.topspeed,4) + \
-                Utilities.dec2hex(self.trackpointCount,8)
-
-                #package segments of 136 trackpoints
-        chunks = []
-        for frome in xrange(0, self.trackpointCount, 136):
-            to = (self.trackpointCount - 1) if (frome + 135 > self.trackpointCount) else (frome + 135)
-            trackpointsConverted = ''.join([hex(trackpoint) for trackpoint in self.trackpoints[frome:to+1]])
-            #first segments uses 90, all following 91
-            isFirst = '90' if frome == 0 else '91'
-            payload = Utilities.dec2hex(27 + (15 * ((to-frome) + 1)), 4)                      
-            checksum = Utilities.checkersum((GB500.COMMANDS['setTracks'] % {'payload':payload, 'isFirst':isFirst, 'trackInfo':date+infos, 'from':Utilities.dec2hex(frome,4), 'to':Utilities.dec2hex(to,4), 'trackpoints': trackpointsConverted, 'checksum':'00'})[2:-2])
-                       
-            chunks.append(GB500.COMMANDS['setTracks'] % {'payload':payload, 'isFirst':isFirst, 'trackInfo':date+infos, 'from':Utilities.dec2hex(frome,4), 'to':Utilities.dec2hex(to,4), 'trackpoints': trackpointsConverted, 'checksum':checksum})
-        return ''.join(chunks)
-        
-    def fromHex(self, hex, timezone=utc):
-        if len(hex) == 128:
-            self.date            = datetime.datetime(2000+int(hex[0:2], 16), int(hex[2:4], 16), int(hex[4:6], 16), int(hex[6:8], 16), int(hex[8:10], 16), int(hex[10:12], 16))
-            self.trackpointCount = int(Utilities.swap(hex[12:16]), 16)
-            self.duration        = datetime.timedelta(seconds=int(Utilities.swap(hex[16:24]), 16)/10)
-            self.distance        = int(Utilities.swap(hex[24:32]), 16)
-            self.lapCount        = int(hex[32:36], 16)
-            self.pointer         = hex[36:40]
-            self.calories        = int(Utilities.swap(hex[48:52]), 16)
-            self.topspeed        = int(Utilities.swap(hex[56:64]), 16)/100
-            self.climb           = int(Utilities.swap(hex[68:72]), 16)        
-
-            # localize date and then convert to UTC
-            self.date = timezone.localize(self.date).astimezone(utc)
-            return self
-                
-#            if len(hex) == 48:
-#                self.id = Utilities.hex2dec(hex[44:48])
-#            return self
-        else:
-            raise GB500ParseException(self.__class__.__name__, len(hex), 128)
-        
-    def addTrackpointsFromHex(self, hex):        
-        trackpoints = Utilities.chop(hex, 64)
-        for trackpoint in trackpoints: 
-            #print trackpoint
-            parsedTrackpoint = Trackpoint().fromHex(trackpoint)
-            
-            if not self.trackpoints:
-                parsedTrackpoint.calculateDate(self.date)
-            else:
-                parsedTrackpoint.calculateDate(self.trackpoints[-1].date)
-            self.trackpoints.append(parsedTrackpoint)
-                                        
-    def export(self, format, **kwargs):
-        ef = ExportFormat(format)
-        ef.exportTrack(self)
-        
-        
-class TrackWithLaps(Track):
-    def __init__(self, date = datetime.datetime.utcnow(), duration = 0, distance = 0, calories = 0, topspeed = 0, climb = 0, trackpointCount = 0, lapCount = 0):
         self.lapCount = lapCount
         self.laps = []
-        super(TrackWithLaps, self).__init__(date, duration,distance, calories, topspeed, climb, trackpointCount)
+        #super(TrackWithLaps, self).__init__(date, duration,distance, calories, topspeed, climb, trackpointCount)
      
+    def __getitem__(self, attr):
+        return getattr(self, attr)
+
     def __str__(self):
         return "%s %08i %08i %08i %08i %08i %04i" % (self.date, self.distance, self.calories, self.topspeed, self.climb, self.trackpointCount, self.lapCount)
-    
-    def __hex__(self):            
-        date = Utilities.dec2hex(self.date.strftime('%y'),2) + Utilities.dec2hex(self.date.strftime('%m'),2) + \
-               Utilities.dec2hex(self.date.strftime('%d'),2) + Utilities.dec2hex(self.date.strftime('%H'),2) + \
-               Utilities.dec2hex(self.date.strftime('%M'),2) + Utilities.dec2hex(self.date.strftime('%S'),2)
-               
-        infos = Utilities.dec2hex(self.lapCount,2) + Utilities.dec2hex(self.duration,8) + \
-                Utilities.dec2hex(self.distance,8) + Utilities.dec2hex(self.calories,4) + Utilities.dec2hex(self.topspeed,4) + \
-                Utilities.dec2hex(0,8) + Utilities.dec2hex(self.trackpointCount,8)
-                
-        lapsConverted = Utilities.dec2hex(0,44)
-        payload_laps = Utilities.dec2hex(32 + (self.lapCount * 22),4)
-        checksum_laps = Utilities.checkersum((GH625.COMMANDS['setTracksLaps'] % {'payload':payload_laps, 'trackInfo':date+infos, 'laps': lapsConverted, 'nrOfTrackpoints': Utilities.dec2hex(self.trackpointCount,8), 'checksum':'00'})[2:-2])
-        lap_chunk = GH625.COMMANDS['setTracksLaps'] % {'payload':payload_laps, 'trackInfo':date+infos, 'laps': lapsConverted, 'nrOfTrackpoints': Utilities.dec2hex(self.trackpointCount,8), 'checksum':checksum_laps}
-
-        chunks = []
-        chunks.append(lap_chunk)
-        #package segments of 136 trackpoints
-        for frome in xrange(0, self.trackpointCount, 136):
-            to = (self.trackpointCount - 1) if (frome + 135 > self.trackpointCount) else (frome + 135)
-            
-            trackpointsConverted = ''.join([hex(trackpoint) for trackpoint in self.trackpoints[frome:to+1]])
-            payload = Utilities.dec2hex(32 + (15 * ((to-frome) + 1)), 4)                      
-            checksum = Utilities.checkersum((GH625.COMMANDS['setTracks'] % {'payload':payload, 'trackInfo':date+infos, 'from':Utilities.dec2hex(frome,4), 'to':Utilities.dec2hex(to,4), 'trackpoints': trackpointsConverted, 'checksum':'00'})[2:-2])
-                       
-            chunks.append(GH625.COMMANDS['setTracks'] % {'payload':payload, 'trackInfo':date+infos, 'from':Utilities.dec2hex(frome,4), 'to':Utilities.dec2hex(to,4), 'trackpoints': trackpointsConverted, 'checksum':checksum})
-        return ''.join(chunks)
     
     def fromHex(self, hex, timezone=utc):
         if len(hex) == 128:
@@ -388,6 +285,18 @@ class TrackWithLaps(Track):
             return self
         else:
             raise GB500ParseException(self.__class__.__name__, len(hex), 128)
+
+    def addTrackpointsFromHex(self, hex):        
+        trackpoints = Utilities.chop(hex, 64)
+        for trackpoint in trackpoints: 
+            #print trackpoint
+            parsedTrackpoint = Trackpoint().fromHex(trackpoint)
+            
+            if not self.trackpoints:
+                parsedTrackpoint.calculateDate(self.date)
+            else:
+                parsedTrackpoint.calculateDate(self.trackpoints[-1].date)
+            self.trackpoints.append(parsedTrackpoint)
         
     def addLapsFromHex(self, hex):
         laps = Utilities.chop(hex,96)
@@ -396,6 +305,9 @@ class TrackWithLaps(Track):
             parsedLap.calculateDate(self.date)
             self.laps.append(parsedLap)
 
+    def export(self, format, **kwargs):
+        ef = ExportFormat(format)
+        ef.exportTrack(self)
 
 class ExportFormat(object):    
     def __init__(self, format):
@@ -527,7 +439,7 @@ class SerialInterface():
             self.serial.write(Utilities.hex2chr(hex))
             #self.serial.sendBreak(2)
             time.sleep(self._sleep)
-            self.logger.debug("waiting at serialport: %i" % self.serial.inWaiting())
+            #self.logger.debug("waiting at serialport: %i" % self.serial.inWaiting())
         #except:
         #    raise GB500SerialException
 
@@ -537,7 +449,7 @@ class SerialInterface():
         return data
 
     def _readPrecise(self):
-	# find the payload and read that many bytes 1 at a time
+	# find the payload and read the exact number of bytes 1 at a time
 	# much faster than guessing at it and waiting for the timeout
 	# byte by byte improves flow control/buffer overruns in linux	
         raw = ''
@@ -687,13 +599,16 @@ class GB500(SerialInterface):
         return [track.pointer for track in allTracks]
     
     def getAllTracks(self):
-        return self.getTracks(self.getAllTrackIds())
+	tracks = []
+        for trackPtr in self.getAllTrackIds():
+             tracks.append(self.getTrack(trackPtr))
+	return tracks
     
     @serial_required
-    def getTracks(self, trackIds):
+    def getTrack(self, trackPtr):
         raise NotImplemented('This is an abstract method, please instantiate a subclass')
     
-    def exportTracks(self, track, format = None, path = None, **kwargs):
+    def exportTrack(self, track, format = None, path = None, **kwargs):
         if format is None:
             format = self.config.get("export", "default")
         if path is None:
@@ -882,7 +797,7 @@ class GB580(GB500):
             pass
         
     @serial_required
-    def getTracks(self, trackPtr):
+    def getTrack(self, trackPtr):
         checksum = Utilities.checkersum("05800100%s" % (trackPtr))
         self._writeSerial('getTracks', **{'trackPtr':trackPtr, 'checksum':checksum})                    
         newtrack = None
@@ -923,6 +838,7 @@ class GB580(GB500):
                 print
                 for lap in newtrack.laps:
                     lap.calculateCoordinates(newtrack.trackpoints)
+                    #self.logger.debug(lap)
                 break        
 
         self.logger.debug('added 1 track')

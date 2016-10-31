@@ -1,4 +1,4 @@
-from gb580_device import TrackWithLaps
+from gb580 import TrackWithLaps
 
 #training center requires every workout to have at least one lap
 #which contains all the trackpoints belonging to it

@@ -1,15 +1,16 @@
-Tasks for gb580 script:
+﻿Tasks for gb580 script:
 1.) fix menu so that it reads the tracklist once and keeps it in a variable listing each call to choose() instead of querying each time
 	a.) if there's only 1 track export it without prompting.
 2.) add color
 * 3.) add more extensions to gpx and tcx (fix/finish tcx!)
-4.) add progress bar and figure out the trackpoint header
-5.) truncate with each execute and prune the log
+4.) add progress bar and figure out the trackpoint header DONE
+5.) truncate with each execute and prune the log DONE
 6.) query port instead of relying on config.ini *DONE*
 7.) fix laps
 8.) figure out how to get it to work for cyclo and timex
-9.) add option to display in imperial units
+9.) add option to display in imperial units DONE
 10.) add strava upload option with api keys in config.ini
 11.) speed it up *DONE*
 12.) persist altitude on export option i.e. "with barometer"
-13.) reorginaze module layout to accomdate more devices
+13.) reorganize module layout to accomdate more devices  DONE
+14.) Fix exportb
