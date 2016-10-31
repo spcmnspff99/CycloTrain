@@ -13,4 +13,5 @@
 11.) speed it up *DONE*
 12.) persist altitude on export option i.e. "with barometer"
 13.) reorganize module layout to accomdate more devices  DONE
-14.) Fix exportb
+14.) Fix/test exports DONE
+15.) Review CL params
