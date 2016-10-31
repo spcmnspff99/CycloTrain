@@ -28,7 +28,9 @@ I have added an option to upload the exported file(s) to strava automatically af
 The strava api is designed to exchange an access token with a web application. You have to grant any application script access to your data before it can upload or exchange data.  To do this in a traditional way, you would need to run a  web server and run code to handle this token exchange.  However it is stil possible to set this up with only a web browser and curl. Here are the steps I took to make that happen:
 
 1.) Setup your strava account if you havent already. (The account does not have to be premium.)
+
 2.) Log into your account from your browser to get a session.
+
 3.) Now Create your own api aplication by pointing your browser to this url:
 
 		https://www.strava.com/settings/api
