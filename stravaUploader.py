@@ -14,6 +14,10 @@ class stravaUploader(object):
         self.format          = format 
         self.handle          = handle
         self.apiKey          = None
+        self.id              = None
+
+        # turn off the warning because we're not checking the cert
+        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
     @property
     def url(self):
@@ -45,13 +49,7 @@ class stravaUploader(object):
 
     def upload(self):
         if self.apiKey is not None:
-
-            # turn off the warning because we're not checking the cert
-            requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-
-            headers = {
-                        'Authorization': 'Bearer ' + self.apiKey
-            }
+            headers = {'Authorization': 'Bearer ' + self.apiKey}
 
             if self.filename is not None:
                 files = {'file': open(self.filename, 'rb')}
@@ -80,10 +78,11 @@ class stravaUploader(object):
             if self.handle is not None:
                 params['external_id'] = self.handle
 
-            r = requests.post(self.url, headers=headers, params = params, files=files, verify=False)
-            return r.json()
+            response = requests.post(self.url, headers=headers, params = params, files=files, verify=False).json()
+            self.id = response['id']
 
-        #else: raise an exception
-
-
-
+    def status(self):
+        headers = {'Authorization': 'Bearer ' + self.apiKey}
+        response = requests.get(self.url + '/' + self.id, headers=headers, verify=False).json()
+        return response['activity_id']
+    

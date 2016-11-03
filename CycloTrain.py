@@ -1,4 +1,4 @@
-import glob, os, os.path, sys
+import glob, os, os.path, sys, time
 import ConfigParser
 from optparse import OptionParser
 
@@ -39,7 +39,16 @@ def upload_to_strava(filename):
     su.filename = filename
     su.format = 'gpx'
     su.private = True
-    return su.upload()
+    print 'uploading file {} to strava'.format(filename)
+    su.upload()
+    time.sleep(1)
+    i=0
+    while su.status != '':
+        print '\rstrava is processing file {}'.format('.'* i) 
+        time.sleep(1)
+        i += 1
+    #print
+
 
 def choose():
     print """
@@ -101,8 +110,7 @@ What do you want to do?\n\
         if su.apiKey is not None:
             query = raw_input("Upload to Strava? [Y/n] ").strip()
             if query[0:1].lower != "n":
-                print
-                print upload_to_strava(filename)
+                upload_to_strava(filename)
 
     elif command.startswith("c"):
         print "Export all tracks"

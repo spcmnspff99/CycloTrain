@@ -802,7 +802,7 @@ class GB580(GB500):
         self._writeSerial('getTracks', **{'trackPtr':trackPtr, 'checksum':checksum})                    
         newtrack = None
         i = 0
-        os.system('setterm -cursor off')
+        #os.system('setterm -cursor off')
         
         while True:
             data = self._readPrecise()
@@ -829,12 +829,13 @@ class GB580(GB500):
 
                 # progress bars are nice
                 progress = int(100 * len(newtrack.trackpoints)/newtrack.trackpointCount)
-                print '\r[{0}] {1}%'.format('#'*(progress/2)+ '-'*((100-progress)/2), progress),
+                bar = progress/2
+                print '\r[{0}] {1}%'.format('#'*bar + '-'*(50-bar), progress),
                 self._writeSerial('requestNextTrackSegment')
 
             else:
                 #we are done, do maintenance work here
-                os.system('setterm -cursor on')
+                #os.system('setterm -cursor on')
                 print
                 for lap in newtrack.laps:
                     lap.calculateCoordinates(newtrack.trackpoints)
