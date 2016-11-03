@@ -1,10 +1,13 @@
-import glob, os, sys
+import glob, os, os.path, sys
+import ConfigParser
 from optparse import OptionParser
 
 from gb580 import GB500, ExportFormat
 from Utilities import Utilities
+from stravaUploader import stravaUploader
 
 gb = GB500()
+su = stravaUploader()
 
 def update_progress(progress):
     print '\r[{0}] {1}%'.format('#'*(progress/10), progress),
@@ -32,6 +35,11 @@ def prompt_format():
     format = raw_input("Choose output format: ").strip()
     return format
         
+def upload_to_strava(filename):
+    su.filename = filename
+    su.format = 'gpx'
+    su.private = True
+    return su.upload()
 
 def choose():
     print """
@@ -88,7 +96,13 @@ What do you want to do?\n\
         ef = ExportFormat(format)
         merge = False
         track = gb.getTrack(headers[index-1].pointer)
-        gb.exportTrack(track, format, merge = merge)
+        filename = gb.exportTrack(track, format, merge = merge)
+
+        if su.apiKey is not None:
+            query = raw_input("Upload to Strava? [Y/n] ").strip()
+            if query[0:1].lower != "n":
+                print
+                print upload_to_strava(filename)
 
     elif command.startswith("c"):
         print "Export all tracks"
@@ -146,7 +160,13 @@ What do you want to do?\n\
     choose()
 
 
-def main():  
+def main():
+    config = ConfigParser.SafeConfigParser()
+    config.read(Utilities.getAppPrefix('config.ini'))
+
+    if config.has_option('api_keys', 'strava'):
+        su.apiKey = config.get('api_keys', 'strava')
+
     #use standard console interface
     if not sys.argv[1:]:
         choose()

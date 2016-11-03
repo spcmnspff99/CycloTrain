@@ -334,7 +334,7 @@ class ExportFormat(object):
         return "%s" % self.name
     
     def exportTrack(self, track, path, **kwargs):
-        self.__export([track], path, **kwargs)
+        return self.__export([track], path, **kwargs)
     
     def exportTracks(self, tracks, path, **kwargs):
         if 'merge' in kwargs and kwargs['merge']:
@@ -360,7 +360,7 @@ class ExportFormat(object):
         
         with open(path, 'wt') as f:
             f.write(rendered)
-
+        return path
 
 class GB500Exception():
     pass
@@ -615,7 +615,7 @@ class GB500(SerialInterface):
             path = os.path.abspath(Utilities.getAppPrefix(self.config.get('export', 'path')))
         
         ef = ExportFormat(format)
-        ef.exportTrack(track, path, **kwargs)
+        return ef.exportTrack(track, path, **kwargs)
     
     def importTracks(self, files, **kwargs):        
         if "path" in kwargs:
