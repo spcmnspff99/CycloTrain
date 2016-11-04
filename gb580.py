@@ -5,6 +5,7 @@ import math
 import time, datetime
 import ConfigParser
 import logging
+import appdirs
 from decimal import Decimal
 
 import serial
@@ -525,7 +526,14 @@ class GB500(SerialInterface):
             
     def __init__(self):
         self.config = ConfigParser.SafeConfigParser()
-        self.config.read(Utilities.getAppPrefix('config.ini'))
+        #look for a user specific config (presumably with api keys)    
+        userConfigPath = appdirs.user_config_dir('CycloTrain')
+        configFile = os.path.join(userConfigPath, 'config.ini') 
+        if os.path.isfile(configFile):
+                self.config.read(configFile)
+        else:
+            configFile = Utilities.getAppPrefix('config.ini')
+            self.config.read(configFile)
         
         self.timezone = timezone(self.config.get('general', 'timezone')) 
         self.units = self.config.get("general", "units")
@@ -783,7 +791,7 @@ class GB580(GB500):
     @serial_required
     def getTracklist(self):
         tracklist = self._querySerial('getTracklist')
-        trackHeaders = []
+        trackHeaders = [] 
         if len(tracklist) > 8:
             j=1
             for hex in Utilities.chop(tracklist[6:-2],48):
@@ -802,7 +810,8 @@ class GB580(GB500):
         self._writeSerial('getTracks', **{'trackPtr':trackPtr, 'checksum':checksum})                    
         newtrack = None
         i = 0
-        #os.system('setterm -cursor off')
+        if sys.platform == 'linux' or sys.platform == 'linux2':
+            os.system('setterm -cursor off')
         
         while True:
             data = self._readPrecise()
@@ -835,7 +844,8 @@ class GB580(GB500):
 
             else:
                 #we are done, do maintenance work here
-                #os.system('setterm -cursor on')
+                if sys.platform == 'linux' or sys.platform == 'linux2':
+                    os.system('setterm -cursor on')
                 print
                 for lap in newtrack.laps:
                     lap.calculateCoordinates(newtrack.trackpoints)

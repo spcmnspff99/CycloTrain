@@ -1,5 +1,5 @@
 import glob, os, os.path, sys, time
-import ConfigParser
+import ConfigParser, appdirs
 from optparse import OptionParser
 
 from gb580 import GB500, ExportFormat
@@ -109,7 +109,7 @@ What do you want to do?\n\
 
         if su.apiKey is not None:
             query = raw_input("Upload to Strava? [Y/n] ").strip()
-            if query[0:1].lower != "n":
+            if query[0:1].lower() != "n":
                 upload_to_strava(filename)
 
     elif command.startswith("c"):
@@ -169,11 +169,9 @@ What do you want to do?\n\
 
 
 def main():
-    config = ConfigParser.SafeConfigParser()
-    config.read(Utilities.getAppPrefix('config.ini'))
 
-    if config.has_option('api_keys', 'strava'):
-        su.apiKey = config.get('api_keys', 'strava')
+    if gb.config.has_option('api_keys', 'strava'):
+        su.apiKey = gb.config.get('api_keys', 'strava')
 
     #use standard console interface
     if not sys.argv[1:]:
