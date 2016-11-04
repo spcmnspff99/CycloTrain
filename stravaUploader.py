@@ -3,7 +3,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 class stravaUploader(object):
 
-    def __init__(self, filename = None, activity = None, name = None, description = None, private = False, trainer = False, commute = False, format = 'gpx', handle = None):
+    def __init__(self, filename = None, activity = None, name = None, description = None, private = False, trainer = False, commute = False, format = 'gpx', handle = None, apiKey = None):
         self.filename        = filename
         self._activity       = activity
         self.name            = name 
@@ -13,8 +13,9 @@ class stravaUploader(object):
         self.commute         = commute 
         self.format          = format 
         self.handle          = handle
-        self.apiKey          = None
-        self.id              = None
+        self.apiKey          = apiKey
+        self.uploadId       = None
+        self._activityId     = None
 
         # turn off the warning because we're not checking the cert
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -46,6 +47,15 @@ class stravaUploader(object):
             self._format = value
         else:
             raise TypeError("Invalid file data type.")
+
+    @property
+    def activityId(self):
+        if self._activityId is None and self.apiKey is not None and self.uploadId is not None:
+            headers = {'Authorization': 'Bearer ' + self.apiKey}
+            response = requests.get(self.url + '/' + str(self.uploadId), headers=headers, verify=False).json()['activity_id']
+            if response is not None:
+                self._activityId = response 
+        return self._activityId
 
     def upload(self):
         if self.apiKey is not None:
@@ -79,10 +89,5 @@ class stravaUploader(object):
                 params['external_id'] = self.handle
 
             response = requests.post(self.url, headers=headers, params = params, files=files, verify=False).json()
-            self.id = response['id']
-
-    def status(self):
-        headers = {'Authorization': 'Bearer ' + self.apiKey}
-        response = requests.get(self.url + '/' + self.id, headers=headers, verify=False).json()
-        return response['activity_id']
-    
+            self.uploadId = response['id']
+        # else: raise exception

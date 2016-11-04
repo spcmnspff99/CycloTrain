@@ -7,7 +7,6 @@ from Utilities import Utilities
 from stravaUploader import stravaUploader
 
 gb = GB500()
-su = stravaUploader()
 
 def update_progress(progress):
     print '\r[{0}] {1}%'.format('#'*(progress/10), progress),
@@ -39,16 +38,15 @@ def upload_to_strava(filename):
     su.filename = filename
     su.format = 'gpx'
     su.private = True
-    print 'uploading file {} to strava'.format(filename)
+    print 'uploading {} to strava'.format(os.path.basename(filename))
     su.upload()
     time.sleep(1)
-    i=0
-    while su.status != '':
-        print '\rstrava is processing file {}'.format('.'* i) 
+    print 'strava is processing the file ',
+    while su.activityId is None:
+        print '.',
         time.sleep(1)
-        i += 1
-    #print
-
+    print 'done'
+    print 'new activity_id: {}'.format(str(su.activityId))
 
 def choose():
     print """
@@ -169,7 +167,8 @@ What do you want to do?\n\
 
 
 def main():
-
+    global su
+    su = stravaUploader()
     if gb.config.has_option('api_keys', 'strava'):
         su.apiKey = gb.config.get('api_keys', 'strava')
 
