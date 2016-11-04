@@ -1,4 +1,4 @@
-cyclotrain.pl - Portable script for interfacing with the globalsat GB580 family of devices
+CycloTrain.pl - Portable script for interfacing with the globalsat GB580 family of devices
 
 Credit where credit is due
 ---------------------------
@@ -6,7 +6,7 @@ This code borrows heavily and was branched from [speigei/gh615](https://github.c
 
 Yet another special thanks goes to Globalsat themselves. They provided vital documentation without which this project would have floundered.  Also, I am a big fan of their products.
 
-Some concepts were taken from the python stravalib project as far as the correct way to post to the strava API3 using the python requests library. There just isnt enough guidence in the api documentation itself and every other python project out there uploading tracks is using stravalib itslef.  I was relucatnt to inport starvalib as I only wanted to upload and didnt need the bloat that comes with all the entire api.  Its seemed too big for my little script.
+Some concepts were taken from the python stravalib project as far as the correct way to post to the strava API3 using the python requests library. There just isnt enough guidence in the api documentation itself and every other python project out there uploading tracks is using stravalib itslef.  I was reluctant to import starvalib for this project as I only needed the upload feature and didnt need the bloat that comes with the entire api.  It seemed too big for my little script.
 
 This code is licensed under gpl3.
 
@@ -22,7 +22,7 @@ Other things
 ------------
 The script is able to detect the virtual serial port automatically and only uses the config.ini setting as a fallback.  This makes it particularly nice when switching between linux and windows as you really never have to fuss with config.ini.
 
-With some minor modification and in most cases no modification whatsoever, all the original exports from the gh615 code work - this speaks to the skill of the original coder.  i.e. Nmea sentence, goolgle earth html, etc
+With some minor modification and in most cases no modification whatsoever, all the original exports from the gh615 code work - this speaks to the skill of the original coder.  i.e. Nmea sentence, goolgle earth html, etc.
 
 I have added an option to upload the exported file(s) to strava automatically after the track is exported. This requires interfacing with the strava api3.  If this functionality is important to you, you will need to obtain an access token from strava and place it into the config.ini file under [api_keys].  Note, if you do place any sensitive information into this file, please copy it to one of the following paths before you do for security reasons:
 
