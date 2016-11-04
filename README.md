@@ -24,7 +24,7 @@ The script is able to detect the virtual serial port automatically and only uses
 
 With some minor modification and in most cases no modification whatsoever, all the original exports from the gh615 code work - this speaks to the skill of the original coder.  i.e. Nmea sentence, goolgle earth html, etc
 
-I have added an option to upload the exported file(s) to strava automatically after the track is exported. This requires interfacing with the strava api3.  If this functionality is important to you, you will need an access token from strava and place it into the config.ini file under [api_keys].  Note, if you do place any sensitive information into this file please copy it to one of the following paths before you do for security reasons:
+I have added an option to upload the exported file(s) to strava automatically after the track is exported. This requires interfacing with the strava api3.  If this functionality is important to you, you will need to obtain an access token from strava and place it into the config.ini file under [api_keys].  Note, if you do place any sensitive information into this file, please copy it to one of the following paths before you do for security reasons:
 
         windows: c:\users\<--YOURUSERNAME-->\AppData\Local\CycloTrain\Cyclotrain\
         linux: ~/.config/CycloTrain/
@@ -37,9 +37,7 @@ I have added an option to upload the exported file(s) to strava automatically af
 
 2.) Log into your account from your browser to get a session.
 
-3.) Now Create your own api aplication by pointing your browser to here: [https://www.strava.com/settings/api](https://www.strava.com/settings/api)
-   
-	Entries are sort of arbitrary in the form here's what I have:
+3.) Now Create your own api application by pointing your browser here: [https://www.strava.com/settings/api](https://www.strava.com/settings/api). Entries are sort of arbitrary in the form, but here's what I have:
 
 	Application Name:  CycloTrain
 	Website: http://www.google.com  ; must be any valid url
