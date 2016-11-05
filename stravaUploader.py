@@ -51,13 +51,14 @@ class stravaUploader(object):
         else:
             raise TypeError("Invalid file data type.")
 
+
     @property
     def activityId(self):
         if self._activityId is None and self.apiKey is not None and self.uploadId is not None:
             headers = {'Authorization': 'Bearer ' + self.apiKey}
-            response = requests.get(self.url + '/' + str(self.uploadId), headers=headers, verify=False).json()['activity_id']
-            if response is not None:
-                self._activityId = response 
+            r = requests.get(self.url + '/' + str(self.uploadId), headers=headers, verify=False).json()
+            if r['activity_id'] is not None:
+                self._activityId = r['activity_id']
         return self._activityId
 
     def upload(self):
@@ -94,3 +95,4 @@ class stravaUploader(object):
             response = requests.post(self.url, headers=headers, params = params, files=files, verify=False).json()
             self.uploadId = response['id']
         # else: raise exception
+    

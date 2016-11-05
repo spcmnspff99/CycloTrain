@@ -840,6 +840,7 @@ class GB580(GB500):
                 progress = int(100 * len(newtrack.trackpoints)/newtrack.trackpointCount)
                 bar = progress/2
                 print '\r[{0}] {1}%'.format('#'*bar + '-'*(50-bar), progress),
+                sys.stdout.flush()
                 self._writeSerial('requestNextTrackSegment')
 
             else:

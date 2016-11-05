@@ -39,15 +39,23 @@ def upload_to_strava(filename):
     su.filename = filename
     su.format = 'gpx'
     su.private = True
-    print 'uploading {} to strava'.format(os.path.basename(filename))
+    print 'uploading {} to Strava'.format(os.path.basename(filename))
     su.upload()
-    time.sleep(1)
-    print 'strava is processing the file ',
-    while su.activityId is None:
+    if sys.platform == 'linux' or sys.platform == 'linux2':
+        os.system('setterm -cursor off')
+    print 'Strava is processing the file ',
+    sys.stdout.flush()
+    while True:
+        if su.activityId is not None:
+            break
         print '.',
+        sys.stdout.flush()
         time.sleep(1)
+
     print 'done'
     print 'new activity_id: {}'.format(str(su.activityId))
+    if sys.platform == 'linux' or sys.platform == 'linux2':
+        os.system('setterm -cursor on')
 
 def choose():
     print """
