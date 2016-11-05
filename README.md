@@ -41,22 +41,22 @@ I have added an option to upload the exported file(s) to strava automatically af
 
 	Application Name:  CycloTrain
 	Website: http://www.google.com  ; must be any valid url
-	Authorization Callback Domain: localhost ; better if its not valid domain
+	Authorization Callback Domain: localhost ; better if it's not a valid domain
 
 4.) Click to create.  You will see 3 fields at the top of the web page: Client ID, Client Secret, and Your Access Token.  This access token only grants read only and will not allow any uploads.  So copy the client ID and client secret and paste them into an empty test document and save. 
 
 5.) Paste the client id into this url in a browser window:
 
-	https://www.strava.com/oauth/authorize?client_id=<-- YOUR CLIENT ID HERE -->&response_type=code&redirect_uri=http://localhost/token_exchange&scope=write&state=mystate&approval_prompt=force
+	https://www.strava.com/oauth/authorize?client_id=<--YOUR CLIENT ID HERE-->&response_type=code&redirect_uri=http://localhost/token_exchange&scope=write&state=mystate&approval_prompt=force
 
 6.) You will see a web page with an Authorize button.  Click the botton and you will be directed to a non working webpage (i.e. your callback domain).  In the url address bar of this non working page, copy the auth code:
 
- 	http://localhost/token_exchange?state=mystate&code=<-- YOUR AUTH CODE IS HERE -->
+ 	http://localhost/token_exchange?state=mystate&code=<--YOUR AUTH CODE IS HERE-->
 
 7.) From a terminal or cmd window run the following curl command after pasting in the appropriate information:
 
 		curl -X POST https://www.strava.com/oauth/token \
-		    -F client_id=<CLINETID> \
+		    -F client_id=<CLIENTID> \
 		    -F client_secret=<SECRET> \
 		    -F code=<AUTH CODE>
 

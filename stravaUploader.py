@@ -4,6 +4,13 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 class stravaUploader(object):
 
     def __init__(self, filename = None, activity = None, name = None, description = None, private = False, trainer = False, commute = False, format = 'gpx', handle = None, apiKey = None):
+        self.apiKey          = None
+        self.reset()
+
+        # turn off the warning because we're not checking the cert
+        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
+    def reset(self, filename = None, activity = None, name = None, description = None, private = False, trainer = False, commute = False, format = 'gpx', handle = None):
         self.filename        = filename
         self._activity       = activity
         self.name            = name 
@@ -13,12 +20,8 @@ class stravaUploader(object):
         self.commute         = commute 
         self.format          = format 
         self.handle          = handle
-        self.apiKey          = apiKey
-        self.uploadId       = None
+        self.uploadId        = None
         self._activityId     = None
-
-        # turn off the warning because we're not checking the cert
-        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
     @property
     def url(self):

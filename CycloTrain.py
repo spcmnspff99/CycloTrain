@@ -7,6 +7,7 @@ from Utilities import Utilities
 from stravaUploader import stravaUploader
 
 gb = GB500()
+su = stravaUploader()
 
 def update_progress(progress):
     print '\r[{0}] {1}%'.format('#'*(progress/10), progress),
@@ -109,6 +110,7 @@ What do you want to do?\n\
             query = raw_input("Upload to Strava? [Y/n] ").strip()
             if query[0:1].lower() != "n":
                 upload_to_strava(filename)
+                su.reset()
 
     elif command.startswith("c"):
         print "Export all tracks"
@@ -167,9 +169,7 @@ What do you want to do?\n\
 
 
 def main():
-    global su
-    su = stravaUploader()
-    if gb.config.has_option('api_keys', 'strava'):
+    if su.apiKey is None and gb.config.has_option('api_keys', 'strava'):
         su.apiKey = gb.config.get('api_keys', 'strava')
 
     #use standard console interface
