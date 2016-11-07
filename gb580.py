@@ -810,8 +810,6 @@ class GB580(GB500):
         self._writeSerial('getTracks', **{'trackPtr':trackPtr, 'checksum':checksum})                    
         newtrack = None
         i = 0
-        if sys.platform == 'linux' or sys.platform == 'linux2':
-            os.system('setterm -cursor off')
         
         while True:
             data = self._readPrecise()

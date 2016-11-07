@@ -1,7 +1,6 @@
 import glob, os, os.path, sys, time
 import ConfigParser, appdirs
 from optparse import OptionParser
-
 from gb580 import GB500, ExportFormat
 from Utilities import Utilities
 from stravaUploader import stravaUploader
@@ -9,9 +8,6 @@ from stravaUploader import stravaUploader
 gb = GB500()
 su = stravaUploader()
 
-def update_progress(progress):
-    print '\r[{0}] {1}%'.format('#'*(progress/10), progress),
-    
 def tracklist():
     headers = gb.getTracklist()
     #display
@@ -35,27 +31,27 @@ def prompt_format():
     format = raw_input("Choose output format: ").strip()
     return format
         
-def upload_to_strava(filename):
-    su.filename = filename
-    su.format = 'gpx'
+def upload_to_strava():
     su.private = True
-    print 'uploading {} to Strava'.format(os.path.basename(filename))
+    print 'uploading {} to Strava'.format(os.path.basename(su.filename))
     su.upload()
-    if sys.platform == 'linux' or sys.platform == 'linux2':
-        os.system('setterm -cursor off')
-    print 'Strava is processing the file ',
-    sys.stdout.flush()
-    while True:
-        if su.activityId is not None:
-            break
-        print '.',
+    if su.duplicate:
+        print 'Strava thinks this activity is a duplicate'
+    else:   
+        if sys.platform == 'linux' or sys.platform == 'linux2':
+            os.system('setterm -cursor off')
+        print 'Strava is processing the file ',
         sys.stdout.flush()
-        time.sleep(1)
-
-    print 'done'
-    print 'new activity_id: {}'.format(str(su.activityId))
-    if sys.platform == 'linux' or sys.platform == 'linux2':
-        os.system('setterm -cursor on')
+        while True:
+            time.sleep(1)
+            print '.',
+            sys.stdout.flush()
+            if su.activityId is not None:
+                break
+        print 'done'
+        print 'new activity_id: {}'.format(str(su.activityId))
+        if sys.platform == 'linux' or sys.platform == 'linux2':
+            os.system('setterm -cursor on')
 
 def choose():
     print """
@@ -67,7 +63,7 @@ What do you want to do?\n\
 [c]  = export all tracks (to default format)\n\
 [c?] = select format or [c <format>]\n\
 -----WAYPOINTS-----\n\
-[e]  = download waypoints\n\
+[e]  = download waypoints\n\quit
 [f]  = upload waypoints\n\
 -----ETC-----------\n\
 [gg] = format tracks\n\
@@ -91,7 +87,6 @@ What do you want to do?\n\
             headers = tracklist()
         
         pick = raw_input("enter track index ").strip()
-
         trackIndex = pick
         try:
             index = int(pick)
@@ -114,10 +109,12 @@ What do you want to do?\n\
         track = gb.getTrack(headers[index-1].pointer)
         filename = gb.exportTrack(track, format, merge = merge)
 
-        if su.apiKey is not None:
-            query = raw_input("Upload to Strava? [Y/n] ").strip()
+        if su.apiKey is not None and format in {'tcx','gpx','gpx_ext'}:
+            query = raw_input("upload to Strava? [Y/n] ").strip()
             if query[0:1].lower() != "n":
-                upload_to_strava(filename)
+                su.format = format if format != 'gpx_ext' else 'gpx'
+                su.filename = filename 
+                upload_to_strava()
                 su.reset()
 
     elif command.startswith("c"):

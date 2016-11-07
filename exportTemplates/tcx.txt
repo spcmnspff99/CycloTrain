@@ -19,17 +19,23 @@
               <LongitudeDegrees>$trackpoint.longitude</LongitudeDegrees>
             </Position>
             <AltitudeMeters>$trackpoint.altitude</AltitudeMeters>
-            <HeartRateBpm>$trackpoint.heartrate</HeartRateBpm>
-            <runcadence>$trackpoint.cadence</runcadence>
-            <watts>$trackpoint.power</watts>
-            
+            <HeartRateBpm xsi:type="HeartRateBPM_t">
+                <Value>$trackpoint.heartrate</Value>
+            </HeartRateBpm>
+            <Cadence>$trackpoint.cadence</Cadence>
+            <Extensions>
+                <TPX>
+                    <Watts>trackpoint.power</Watts>
+                    <Speed>trackpoint.speed</Speed>
+                </TPX>
+            </Extensions>
+            <SensorState>Present</SensorState>
           </Trackpoint>
           <% endfor %>
         </Track>
       </Lap>
-
       <Creator xsi:type="Device_t">
-        <Name>Globalsat GH600</Name>
+        <Name>Globalsat gb580p with barometer</Name>
         <UnitId>0</UnitId>
         <ProductID>0</ProductID>
         <Version>

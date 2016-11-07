@@ -1,4 +1,5 @@
-import requests
+import requests, gzip
+#from tempfile import NamedTemporaryFile
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 class stravaUploader(object):
@@ -20,6 +21,7 @@ class stravaUploader(object):
         self.commute         = commute 
         self.format          = format 
         self.handle          = handle
+        self.duplicate       = False
         self.uploadId        = None
         self._activityId     = None
 
@@ -37,7 +39,7 @@ class stravaUploader(object):
         if value.lower() in possible:
             self._activity = value
         else:
-            raise TypeError("Invalid activity type.")
+            raise TypeError("Invalid activity type")
  
     @property
     def format(self):
@@ -49,8 +51,7 @@ class stravaUploader(object):
         if value.lower() in possible:
             self._format = value
         else:
-            raise TypeError("Invalid file data type.")
-
+            raise TypeError("Invalid file data type")
 
     @property
     def activityId(self):
@@ -66,8 +67,18 @@ class stravaUploader(object):
             headers = {'Authorization': 'Bearer ' + self.apiKey}
 
             if self.filename is not None:
-                files = {'file': open(self.filename, 'rb')}
-            #else: raise an exception
+                f = open(self.filename, 'rb')
+                # gzip the file for performance 
+                if self.format[-2:] != 'gz':
+                    #cf = NamedTemporaryFile(suffix='.gz')
+                    gzip.GzipFile(self.filename + '.gz', mode='w+b').writelines(f)               
+                    files = {'file': open(self.filename + '.gz', 'rb')}
+                    self._format +='.gz'
+                else:
+                    files = {'file': f}
+                
+            else: 
+                raise Exception('Nothing to upload')
 
             params= {'data_type': self.format}
 
@@ -92,7 +103,27 @@ class stravaUploader(object):
             if self.handle is not None:
                 params['external_id'] = self.handle
 
-            response = requests.post(self.url, headers=headers, params = params, files=files, verify=False).json()
-            self.uploadId = response['id']
-        # else: raise exception
+            res = requests.post(self.url, headers=headers, params = params, files=files, verify=False).json()
+            # if we get an id we're almost home ...'
+            if 'id' in res:
+                self.uploadId = res['id']
+                # ... but we still need to check for an error ...
+                if res['error'] is not None:
+                    error = res['error']
+                    # ... usually this is a dupe but you never know
+                    if 'duplicate' in error:
+                        self.duplicate = True
+                    else:
+                        raise Exception('Strava error: ' + error)    
+
+            # but the strava upload api never returns a happy 'message' 
+            else:
+                msg = 'APIv3 Upload Error.'
+                if 'message' in res:
+                    msg += ' ' + res['message']
+                if 'errors' in res: 
+                    msg += ' ' + res['errors'][0]['field'] + ' ' + res['errors'][0]['code']
+                raise Exception(msg)
+        else: 
+            raise Exception('Api key is not set')
     
