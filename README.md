@@ -20,24 +20,26 @@ The script remains CLI only - which makes it very fast.  There have been a numbe
 
 Other things
 ------------
-The script is able to detect the virtual serial port automatically and only uses the config.ini setting as a fallback.  This makes it particularly nice when switching between linux and windows as you really never have to fuss with config.ini.
-
 With some minor modification and in most cases no modification whatsoever, all the original exports from the gh615 code work - this speaks to the skill of the original coder.  i.e. Nmea sentence, goolgle earth html, etc.
 
-I have added an option to upload the exported file(s) to strava automatically after the track is exported. This requires interfacing with the strava api3.  If this functionality is important to you, you will need to obtain an access token from strava and place it into the config.ini file under [api_keys].  Note, if you do place any sensitive information into this file, please copy it to one of the following paths before you do for security reasons:
+The script is able to detect the virtual serial port automatically and only use the config.ini setting as a fallback.  This makes it particularly nice when switching between linux and windows as you really never have to fuss with config.ini.
+
+There are two possible locations for the config.ini file. The default location is the local context from which the script is running. But there is also an option to store the file in a more secure location. The script will check this location first and ignore the local copy. Here are the location details per OS:
 
         windows: c:\users\<--YOURUSERNAME-->\AppData\Local\CycloTrain\Cyclotrain\
         linux: ~/.config/CycloTrain/
- 
- You will need to create the CycloTrain directories. The script will check these folders for the config.ini file first and ignore the one in the current path if it finds it.  
- 
- To obtain the strava acccess token, I have found the simplest way is to go to [the access token generator](//stravacli-dlenski.rhcloud.com) developed as part of the [stravacli toolset on GitHub](https://github.com/dlenski/stravacli).  If that site is ever down, there is a hack to get an access token manually and without a webserver.  Below, I lay out the steps I have taken in the past:
+
+Any directory named "CycloTrain" will need to be created manually.
+
+There is an option to upload the exported file(s) to strava automatically after the track is exported. This requires interfacing with the Strava api3. If this functionality is important to you, you will need to obtain an access token from Strava and place it into the config.ini file under [api_keys]. In this case, it is best to keep the entire config.ini file in the secure location for whichever OS you are running.
+
+To obtain the strava acccess token, I have found the simplest way is to go to [the access token generator](//stravacli-dlenski.rhcloud.com) developed as part of the [stravacli toolset on GitHub](https://github.com/dlenski/stravacli).  If that site is ever down, there is a hack to get an access token manually and without a webserver. Below, I lay out the steps I have taken in the past:
 
 1.) Setup your strava account if you havent already. (The account does not have to be premium.)
 
 2.) Log into your account from your browser to get a session.
 
-3.) Now Create your own api application by pointing your browser here: [https://www.strava.com/settings/api](https://www.strava.com/settings/api). Entries are sort of arbitrary in the form, but here's what I have:
+3.) Create your own api application by pointing your browser here: [https://www.strava.com/settings/api](https://www.strava.com/settings/api). Entries are sort of arbitrary in the form, but here's what I have:
 
 	Application Name:  CycloTrain
 	Website: http://www.google.com  ; must be any valid url
