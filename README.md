@@ -6,7 +6,7 @@ This code borrows heavily and was branched from [speigei/gh615](https://github.c
 
 Yet another special thanks goes to Globalsat themselves. They provided vital documentation without which this project would have floundered.  Also, I am a big fan of their products.
 
-Some concepts were taken from the python stravalib project as far as the correct way to post to the strava API3 using the python requests library. There just isnt enough guidence in the api documentation itself and every other python project out there uploading tracks is using stravalib itslef.  I was reluctant to import starvalib for this project as I only needed the upload feature and didnt need the bloat that comes with the entire api.  It seemed too big for my little script.
+Some concepts were taken from the python stravalib project as far as the correct way to post to the strava API3 using the python requests library. There just isnt enough guidence in the api documentation itself and every other python project out there uploading tracks is using stravalib itslef.  I was reluctant to import starvalib for this project as I only needed the upload feature and didnt need the bloat that comes with the entire api.  It just seemed too big for my little script.
 
 This code is licensed under gpl3.
 
@@ -14,13 +14,13 @@ Name of the project
 -------------------
 My goal is to have a script that is OS portable and can interface with my timex cycle trainer 2.0 - cheifly to download tracks from this device and upload them to Strava.  While researching this, I learned that the device is actually manufactured by Globalsat and was originaly marketed as the GB580P.  The device was also licensed by Magelllan and sold as the Magellan/Mio Cyclo 105.  So the name of the project is a hybridization of the various names this device has been assigned under different branding.  I aim to write a script that can work with any of these devices.
 
-Command Line
+Command line
 ------------
 The script remains CLI only - which makes it very fast.  There have been a number of improvements in this regard compared the original code and it is also very fast when you consider other gui tools that do this same thing, few as they may be. Also, It will run on any host os that can run python and has been tested on linux and windows.
 
 Other things
 ------------
-With some minor modification and in most cases no modification whatsoever, all the original exports from the gh615 code work - this speaks to the skill of the original coder.  i.e. Nmea sentence, goolgle earth html, etc.
+With some minor modification and in most cases no modification whatsoever, all the original exports from the gh615 code work - this speaks to the skill of the original coder.  i.e. Nmea sentence, google earth html, etc.
 
 The script is able to detect the virtual serial port automatically and only use the config.ini setting as a fallback.  This makes it particularly nice when switching between linux and windows as you really never have to fuss with config.ini.
 
