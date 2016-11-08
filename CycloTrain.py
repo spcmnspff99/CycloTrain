@@ -32,26 +32,29 @@ def prompt_format():
         
 def upload_to_strava(format, filenames):
     uploaders = []
-    for filename in filenames
+    if format == 'gpx_ext':
+        format = 'gpx'
+    for filename in filenames:
         su = stravaUploader()
         su.apiKey = gb.apiKey 
         su.format = format
         su.filename = filename 
         su.private = True
-        print 'uploading {} to Strava'.format(os.path.basename(su.filename))
+        print 'uploading {} to Strava'.format(os.path.basename(su.filename)),
         su.upload()
         if su.duplicate:
-            print 'Strava thinks this activity is a duplicate'
+            print '- duplicate activity'
         else:
+            print
             uploaders.append(su)
 
-    if any(uploader.activityId is none for uploader in uploaders):
+    if any(uploader.activityId is None for uploader in uploaders):
         if sys.platform == 'linux' or sys.platform == 'linux2':
             os.system('setterm -cursor off')
         print 'Strava is processing the file(s) ',
         sys.stdout.flush()
         while True: 
-            if any(uploader.activityId is none for uploader in uploaders):
+            if any(uploader.activityId is None for uploader in uploaders):
                 time.sleep(1)
                 print '.',
                 sys.stdout.flush()
@@ -59,14 +62,13 @@ def upload_to_strava(format, filenames):
                 break
         print 'done'
         print "New activity_id(s):",
-        for uploader in uploaders
+        for uploader in uploaders:
             print uploader.activityId,
         print
         if sys.platform == 'linux' or sys.platform == 'linux2':
             os.system('setterm -cursor on')
 
 def choose():
-    filenames = []
     print """
 What do you want to do?\n\
 ------TRACKS-------\n\
@@ -76,7 +78,7 @@ What do you want to do?\n\
 [c]  = export all tracks (to default format)\n\
 [c?] = select format or [c <format>]\n\
 -----WAYPOINTS-----\n\
-[e]  = download waypoints\n\quit
+[e]  = download waypoints\n
 [f]  = upload waypoints\n\
 -----ETC-----------\n\
 [gg] = format tracks\n\
@@ -118,14 +120,13 @@ What do you want to do?\n\
             print "FYI: Exporting to default format '%s' (see config.ini)" % format
         
         ef = ExportFormat(format)
-        merge = False
         track = gb.getTrack(headers[index-1].pointer)
-        filenames.append = (gb.exportTrack(track, format, merge = merge))
+        filenames = [(gb.exportTrack(track, format, merge = False))]
         if gb.apiKey is not None and format in {'tcx','gpx','gpx_ext'}:
             query = raw_input("upload to Strava? [Y/n] ").strip()
             if query[0:1].lower() != "n":
                 upload_to_strava(format, filenames)
-#                su.reset()
+#               su.reset()
 
     elif command.startswith("c"):
         print "Export all tracks"
@@ -138,13 +139,12 @@ What do you want to do?\n\
             print "FYI: Exporting to default format '%s' (see config.ini)" % format
         
         tracks = gb.getAllTracks()
-	for track in tracks:
-        filenames.append = (gb.exportTrack(track, format, merge = merge))
-    print 'exported %i tracks to %s' % (len(tracks), format)
-    if gb.apiKey is not None and format in {'tcx','gpx','gpx_ext'}:
-        query = raw_input("upload to Strava? [Y/n] ").strip()
-        if query[0:1].lower() != "n":
-            upload_to_strava(format, filenames)
+        filenames = [(gb.exportTrack(track, format, merge = False)) for track in tracks]
+        print 'exported %i tracks to %s' % (len(tracks), format)
+        if gb.apiKey is not None and format in {'tcx','gpx','gpx_ext'}:
+            query = raw_input("upload to Strava? [Y/n] ").strip()
+            if query[0:1].lower() != "n":
+                upload_to_strava(format, filenames)
 
     elif command == "e":
         print "Download Waypoints"
@@ -188,9 +188,6 @@ What do you want to do?\n\
 
 
 def main():
-    if su.apiKey is None and gb.config.has_option('api_keys', 'strava'):
-        su.apiKey = gb.config.get('api_keys', 'strava')
-
     #use standard console interface
     if not sys.argv[1:]:
         choose()
