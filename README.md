@@ -10,6 +10,14 @@ Some concepts were taken from the python stravalib project as far as the correct
 
 This code is licensed under gpl3.
 
+Requirements
+------------
+Pyhton2 for now.  This code was written and tested on Python2.7
+
+Required modules:
+pyserial, requests, dattetime, pytz
+
+
 Name of the project
 -------------------
 My goal is to have a script that is OS portable and can interface with my timex cycle trainer 2.0 - cheifly to download tracks from this device and upload them to Strava.  While researching this, I learned that the device is actually manufactured by Globalsat and was originaly marketed as the GB580P.  The device was also licensed by Magelllan and sold as the Magellan/Mio Cyclo 105.  So the name of the project is a hybridization of the various names this device has been assigned under different branding.  I aim to write a script that can work with any of these devices.
@@ -20,6 +28,8 @@ The script remains CLI only - which makes it very fast.  There have been a numbe
 
 Other things
 ------------
+The original gh-615 code was written with a opion parser and commmand line options. That isnt working yet but there are plans for "export the newest track" and "export all tracks" command line options.
+
 With some minor modification and in most cases no modification whatsoever, all the original exports from the gh615 code work - this speaks to the skill of the original coder.  i.e. Nmea sentence, google earth html, etc.
 
 The script is able to detect the virtual serial port automatically and only use the config.ini setting as a fallback.  This makes it particularly nice when switching between linux and windows as you really never have to fuss with config.ini.

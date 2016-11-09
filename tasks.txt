@@ -1,9 +1,9 @@
 ﻿Tasks before posting script to GS forums:
-1.) Get waypoints working
-2.) Test Strava upload with multiple tracks.
-3.) add gzip and use gpx.gz format
-4.) add custom exceptions and raise them for missing file, missing access token
-5.) check response after upload and raise an exception for errors - pass the same error msg from json/dict.
+1.) Get waypoints working DONE
+2.) Test Strava upload with multiple tracks. DONE
+3.) add gzip and use gpx.gz format DONE
+4.) add custom exceptions and raise them for missing file, missing access token DONE
+5.) check response after upload and raise an exception for errors - pass the same error msg from json/dict. DONE
 
 Other Tasks for gb580 script:
 1.) fix menu so that it reads the tracklist once and keeps it in a variable listing each call to choose() instead of querying each time - if there's only 1 track export it without prompting.
