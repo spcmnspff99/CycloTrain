@@ -23,8 +23,9 @@ class Utilities():
     @classmethod
     def hex2signedDec(self, hex):
         value = self.hex2dec(hex)
-        if value > 32767:
-            value = value - 32767 - 2
+        # 2's complement of a 16 bit number
+        if value > 32768:
+            value = value - 65536
         return int(value)
     
     @classmethod

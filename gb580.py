@@ -138,16 +138,16 @@ class Waypoint(Point):
         return "%s (%f,%f)" % (self.title, self.latitude, self.longitude)
         
     def __hex__(self):
-        return "%(title)s00%(type)s%(altitude)s%(latitude)s%(longitude)s" % {
-            'latitude'  : hex(self.latitude),
-            'longitude' : hex(self.longitude),
-            'altitude'  : Utilities.dec2hex(self.altitude,4),
+        return "%(title)s00%(type)s%(altitude)s0000%(latitude)s%(longitude)s" % {
+            'latitude'  : Utilities.swap(hex(self.latitude)),
+            'longitude' : Utilities.swap(hex(self.longitude)),
+            'altitude'  : Utilities.swap(Utilities.dec2hex(self.altitude,4)),
             'type'      : Utilities.dec2hex(self.type,2),
             'title'     : Utilities.chr2hex(self.title.ljust(6)[:6])
         }
         
     def fromHex(self, hex):
-        if len(hex) == 36:            
+        if len(hex) == 40:            
             def safeConvert(c):
                 #if hex == 00 chr() converts it to space, not \x00
                 if c == '00':
@@ -155,15 +155,15 @@ class Waypoint(Point):
                 else:
                     return Utilities.hex2chr(c)
                 
-            self.latitude = Coordinate().fromHex(hex[20:28])
-            self.longitude = Coordinate().fromHex(hex[28:36])
-            self.altitude = Utilities.hex2signedDec(hex[16:20])
+            self.latitude = Coordinate().fromHex(Utilities.swap(hex[24:32]))
+            self.longitude = Coordinate().fromHex(Utilities.swap(hex[32:40]))
+            self.altitude = Utilities.hex2signedDec(Utilities.swap(hex[16:20]))
             self.title = safeConvert(hex[0:2])+safeConvert(hex[2:4])+safeConvert(hex[4:6])+safeConvert(hex[6:8])+safeConvert(hex[8:10])+safeConvert(hex[10:12])
             self.type = Utilities.hex2dec(hex[12:16])
             
             return self
         else:
-            raise GB500ParseException(self.__class__.__name__, len(hex), 36)
+            raise GB500ParseException(self.__class__.__name__, len(hex), 40)
 
 
 class Lap(object):
@@ -446,7 +446,8 @@ class SerialInterface():
 
     def _readSloppy(self, size = 2070):
         data = Utilities.chr2hex(self.serial.read(size))
-        self.logger.debug("serial port returned: %s" % data if len(data) < 30 else "%s... (truncated)" % data[:30])
+        #self.logger.debug("serial port returned: %s" % data if len(data) < 30 else "%s... (truncated)" % data[:30])
+        self.logger.debug("serial port returned: %s" % data)
         return data
 
     def _readPrecise(self):
@@ -466,8 +467,9 @@ class SerialInterface():
         
         data += Utilities.chr2hex(raw)
         self.logger.debug("serial port returned: %s" % data if len(data) < 30 else "%s... (truncated)" % data[:30])
+        #self.logger.debug("serial port returned: %s" % data)
         return data
-    
+
     def _querySerial(self, command, *args, **kwargs):
         tries = 0
         while True:
@@ -667,7 +669,7 @@ class GB500(SerialInterface):
     @serial_required
     def getWaypoints(self):
         response = self._querySerial('getWaypoints')            
-        waypoints = Utilities.chop(response[6:-2], 36) #trim junk
+        waypoints = Utilities.chop(response[46:-2], 40) #trim junk 
         return [Waypoint().fromHex(waypoint) for waypoint in waypoints] 
 
     def exportWaypoints(self, waypoints, **kwargs):
@@ -682,7 +684,7 @@ class GB500(SerialInterface):
         with open(filepath,'wt') as f:
             f.write(rendered)
             
-        self.logger.info('Successfully wrote waypoints to %s' % filepath)
+        self.logger.debug('Successfully wrote waypoints to %s' % filepath)
         return filepath
     
     def importWaypoints(self, **kwargs):
@@ -698,21 +700,21 @@ class GB500(SerialInterface):
         for waypoint in eval(importedWaypoints):
             waypoints.append(Waypoint(str(waypoint['latitude']), str(waypoint['longitude']), waypoint['altitude'], waypoint['title'], waypoint['type']))
             
-        self.logger.info('Successfully read waypoints %i' % len(waypoints)) 
+        self.logger.debug('Successfully read %i waypoint(s) from file' % len(waypoints)) 
         return waypoints
     
     @serial_required
     def setWaypoints(self, waypoints):                               
         waypointsConverted = ''.join([hex(waypoint) for waypoint in waypoints])
-        numberOfWaypoints = Utilities.dec2hex(len(waypoints), 4)
-        payload =  Utilities.dec2hex(3 + (18 * len(waypoints)), 4)
+        numberOfWaypoints = Utilities.swap(Utilities.dec2hex(len(waypoints), 8))
+        payload =  Utilities.dec2hex(5 + (20 * len(waypoints)), 4)
         checksum = Utilities.checkersum("%s76%s%s" % (str(payload), str(numberOfWaypoints), waypointsConverted))
         
         response = self._querySerial('setWaypoints', **{'payload':payload, 'numberOfWaypoints':numberOfWaypoints, 'waypoints': waypointsConverted, 'checksum':checksum})
         
-        if response[:8] == '76000200':
-            waypointsUpdated = Utilities.hex2dec(response[8:10])
-            self.logger.info('waypoints updated: %i' % waypointsUpdated)
+        if response[:6] == '760004':
+            waypointsUpdated = int(Utilities.swap(response[6:10]), 16)
+            self.logger.debug('waypoints updated: %i' % waypointsUpdated)
             return waypointsUpdated
         else:
             self.logger.error('error uploading waypoints')
@@ -803,7 +805,7 @@ class GB580(GB500):
             self.logger.info('%i tracks found' % len(trackHeaders))    
             return trackHeaders    
         else:
-            self.logger.info('no tracks found') 
+            self.logger.info('no tracks Utilities.hex2decfound') 
             pass
         
     @serial_required

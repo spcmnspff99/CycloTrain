@@ -78,7 +78,7 @@ What do you want to do?\n\
 [c]  = export all tracks (to default format)\n\
 [c?] = select format or [c <format>]\n\
 -----WAYPOINTS-----\n\
-[e]  = download waypoints\n
+[e]  = download waypoints\n\
 [f]  = upload waypoints\n\
 -----ETC-----------\n\
 [gg] = format tracks\n\
@@ -156,7 +156,7 @@ What do you want to do?\n\
         print "Upload Waypoints"
         waypoints = gb.importWaypoints()        
         results = gb.setWaypoints(waypoints)
-        print 'Imported %i Waypoints' % results
+        print 'Successfully uploaded %i waypoint(s)' % results
         
     elif command == "gg":
         print "Delete all Tracks"
