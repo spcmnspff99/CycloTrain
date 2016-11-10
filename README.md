@@ -14,7 +14,7 @@ Requirements
 ------------
 This code was written and tested on Python2.7.  There are plans to migrate to python3 but currently the code is only compatible with python2.
 
-Required modules:
+Required python modules:
 pyserial, requests, dattetime, pytz, appdirs
 
 Windows:
@@ -23,7 +23,16 @@ You will need to install a [vitural com port driver.](http://www.st.com/en/devel
 Linux:
 you will need to enable the pl2303 kernel module:
 
-		>sudo modprobe pl2303	
+		# sudo modprobe pl2303	
+
+To access the serial port as a non root user.  You will need to add the user to a specific user group, whichever one owns the device file.  For me that group was uucp.
+
+		# ls -la /dev/tty*
+		
+			crw-rw---- 1 root uucp 4, 65 Oct 31 19:41 /dev/ttyACM0
+
+		# gpasswd --add username uucp
+
 
 Name of the project
 -------------------
