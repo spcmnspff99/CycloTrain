@@ -12,11 +12,18 @@ This code is licensed under gpl3.
 
 Requirements
 ------------
-Pyhton2 for now.  This code was written and tested on Python2.7
+This code was written and tested on Python2.7.  There are plans to migrate to python3 but currently the code is only compatible with python2.
 
 Required modules:
-pyserial, requests, dattetime, pytz
+pyserial, requests, dattetime, pytz, appdirs
 
+Windows:
+You will need to install a [vitural com port driver.](http://www.st.com/en/development-tools/stsw-stm32102.html)
+
+Linux:
+you will need to enable the pl2303 kernel module:
+
+		>sudo modprobe pl2303	
 
 Name of the project
 -------------------
