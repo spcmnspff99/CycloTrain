@@ -539,8 +539,7 @@ class GB500(SerialInterface):
         
         self.timezone = timezone(self.config.get('general', 'timezone')) 
         self.units = self.config.get("general", "units")
-        if self.config.has_option('api_keys', 'strava'):        
-            self.apiKey = self.config.get("api_keys", "strava")
+        self.apiKey = self.config.get("api_keys", "strava") if self.config.has_option('api_keys', 'strava') else ''
 
         #logging http://www.tiawichiresearch.com/?p=31 / http://www.red-dove.com/python_logging.html
         handler = logging.FileHandler(Utilities.getAppPrefix('gb580.log'), mode='w')        
