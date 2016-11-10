@@ -15,7 +15,7 @@ Requirements
 This code was written and tested on Python2.7.  There are plans to migrate to python3 but currently the code is only compatible with python2.
 
 Required python modules:
-pyserial, requests, dattetime, pytz, appdirs
+appdirs, pyserial, pytz, requests
 
 Windows:
 You will need to install a [vitural com port driver.](http://www.st.com/en/development-tools/stsw-stm32102.html)
