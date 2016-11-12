@@ -4,14 +4,18 @@
   <Activities>
     <Activity Sport="Biking">
       <Id>$track.date.isoformat()</Id>
-      <Lap StartTime="$track.date.strftime("%Y-%m-%dT%H:%M:%Sz")">
-        <TotalTimeSeconds>$track.duration.seconds</TotalTimeSeconds>
-        <DistanceMeters>$track.distance</DistanceMeters>
-        <Calories>$track.calories</Calories>
+      <% for i, lap in enumerate(track.laps) %>
+      <Lap StartTime="$lap.start.strftime("%Y-%m-%dT%H:%M:%Sz")">
+        <TotalTimeSeconds>$lap.duration.seconds</TotalTimeSeconds>
+        <DistanceMeters>$lap.distance</DistanceMeters>
+        <Calories>$lap.calories</Calories>
+        <AverageHeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+            <Value>$lap.avgHeartrate</Value>
+        </AverageHeartRateBpm>
         <Intensity>Active</Intensity>
         <TriggerMethod>Manual</TriggerMethod>
         <Track>
-          <% for trackpoint in track.trackpoints %>
+          <% for trackpoint in lap.trackpoints %>
           <Trackpoint>
             <Time>$trackpoint.date.strftime("%Y-%m-%dT%H:%M:%Sz")</Time>
             <Position>
@@ -34,6 +38,7 @@
           <% endfor %>
         </Track>
       </Lap>
+      <% endfor %>
       <Creator xsi:type="Device_t">
         <Name>Globalsat gb580p with barometer</Name>
         <UnitId>0</UnitId>

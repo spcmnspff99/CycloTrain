@@ -78,7 +78,7 @@ class Trackpoint(Point):
             self.cadence    = int(Utilities.swap(hex[48:52]), 16)
             self.pwrcadence = int(Utilities.swap(hex[42:56]), 16)
             self.power      = int(Utilities.swap(hex[56:60]), 16)
-            #self.temp       = int(Utilities.swap(hex[60:64]), 16)
+            self.temp       = int(Utilities.swap(hex[60:64]), 16)
             return self
         else:
             raise GB500ParseException(self.__class__.__name__, len(hex), 64)
@@ -168,14 +168,22 @@ class Waypoint(Point):
 
 class Lap(object):
     def __init__(self, start = datetime.datetime.now(), end = datetime.datetime.now(), duration = datetime.timedelta(), distance = 0, calories = 0,
-                 avgHeartrate = 0, avgCadence = 0,startPoint = Point(0,0), endPoint = Point(0,0)):
+                 maxSpeed = 0, maxHeartrate = 0, avgHeartrate = 0, minAltitude = 0, maxAltitude = 0, avgCadence = 0, maxCadence =0, avgPower = 0,
+                 maxPower = 0, startPoint = Point(0,0), endPoint = Point(0,0)):
         self.start        = start
         self.end          = end
         self.duration     = duration
         self.distance     = distance
         self.calories     = calories
+        self.maxSpeed     = maxSpeed
+        self.maxHeartrate = maxHeartrate
         self.avgHeartrate = avgHeartrate
+        self.minAltitude  = minAltitude
+        self.maxAltitude  = maxAltitude
         self.avgCadence   = avgCadence
+        self.maxCadence   = maxCadence
+        self.avgPower     = avgPower
+        self.maxPower     = maxPower
         self.startPoint   = startPoint
         self.endPoint     = endPoint
         
@@ -187,12 +195,19 @@ class Lap(object):
 
     def fromHex(self, hex):
         if len(hex) == 96:
-            self.__until   = Utilities.hex2dec(hex[:8])
-            self.__elapsed = Utilities.hex2dec(hex[8:16])
-            self.distance = Utilities.hex2dec(hex[16:24])
-            self.calories = Utilities.hex2dec(hex[24:28])
-            self.avgHeartrate = Utilities.hex2dec(hex[42:44])
-            self.avgCadence = Utilities.hex2dec(hex[52:56])
+            self.__until   = int(Utilities.swap(hex[:8]), 16)
+            self.__elapsed = int(Utilities.swap(hex[8:16]), 16)
+            self.distance = int(Utilities.swap(hex[16:24]), 16)
+            self.calories = int(Utilities.swap(hex[24:28]), 16)
+            self.maxSpeed = int(Utilities.swap(hex[32:40]), 16)/100
+            self.maxHeartrate = int(Utilities.swap(hex[40:42]), 16)
+            self.avgHeartrate = int(Utilities.swap(hex[42:44]), 16)
+            self.minAltitude = int(Utilities.swap(hex[44:48]), 16)
+            self.maxAltitude = int(Utilities.swap(hex[48:52]), 16)
+            self.avgCadence = int(Utilities.swap(hex[52:56]), 16)
+            self.maxCadence = int(Utilities.swap(hex[46:60]), 16)
+            self.avgPower = int(Utilities.swap(hex[60:64]), 16)
+            self.maxPower = int(Utilities.swap(hex[64:68]), 16)
             return self
         else:
             print hex

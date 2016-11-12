@@ -35,15 +35,17 @@ def upload_to_strava(format, filenames):
     if format == 'gpx_ext':
         format = 'gpx'
     for filename in filenames:
+        print 'uploading {} to Strava'.format(os.path.basename(filename)),
+        sys.stdout.flush()
         su = stravaUploader()
         su.apiKey = gb.apiKey 
         su.format = format
         su.filename = filename 
         su.private = True
-        print 'uploading {} to Strava'.format(os.path.basename(su.filename)),
         su.upload()
         if su.duplicate:
             print '- duplicate activity'
+            sys.stdout.flush()
         else:
             print
             uploaders.append(su)
