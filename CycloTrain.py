@@ -18,9 +18,6 @@ def tracklist():
         for track in headers:
             print str(track)
         return headers
-    else:
-        print 'no tracks found'
-    pass
 
 def prompt_format():
     print 'available export formats:'
@@ -97,38 +94,33 @@ What do you want to do?\n\
     
     elif command.startswith("b"):
         print "Export track"
-        
-        if command.startswith("b!"):
-            command = command[0] + command[2:]
-        else:
-            headers = tracklist()
-        
-        pick = raw_input("enter track index ").strip()
-        trackIndex = pick
-        try:
-            index = int(pick)
-        except ValueError:
+        headers = tracklist()
+        if headers:        
+            pick = raw_input("enter track index ").strip()
+            trackIndex = pick
+            try:
+                index = int(pick)
+            except ValueError:
+                    index = None
+            if index > len(headers):
+                raise IndexError
                 index = None
-        if index > len(headers):
-            raise IndexError
-            index = None
-   
-        if command == "b?":
-            format = prompt_format()
-        elif command.startswith("b "):
-            format = command[2:].strip() 
-        else:
-            format = gb.config.get("export", "default")
-            print "FYI: Exporting to default format '%s' (see config.ini)" % format
-        
-        ef = ExportFormat(format)
-        track = gb.getTrack(headers[index-1].pointer)
-        filenames = [(gb.exportTrack(track, format, merge = False))]
-        if gb.apiKey is not None and format in {'tcx','gpx','gpx_ext'}:
-            query = raw_input("upload to Strava? [Y/n] ").strip()
-            if query[0:1].lower() != "n":
-                upload_to_strava(format, filenames)
-#               su.reset()
+    
+            if command == "b?":
+                format = prompt_format()
+            elif command.startswith("b "):
+                format = command[2:].strip() 
+            else:
+                format = gb.config.get("export", "default")
+                print "FYI: Exporting to default format '%s' (see config.ini)" % format
+            
+            ef = ExportFormat(format)
+            track = gb.getTrack(headers[index-1].pointer)
+            filenames = [(gb.exportTrack(track, format, merge = False))]
+            if gb.apiKey is not None and format in {'tcx','gpx','gpx_ext'}:
+                query = raw_input("upload to Strava? [Y/n] ").strip()
+                if query[0:1].lower() != "n":
+                    upload_to_strava(format, filenames)
 
     elif command.startswith("c"):
         print "Export all tracks"
@@ -141,12 +133,13 @@ What do you want to do?\n\
             print "FYI: Exporting to default format '%s' (see config.ini)" % format
         
         tracks = gb.getAllTracks()
-        filenames = [(gb.exportTrack(track, format, merge = False)) for track in tracks]
-        print 'exported %i tracks to %s' % (len(tracks), format)
-        if gb.apiKey is not None and format in {'tcx','gpx','gpx_ext'}:
-            query = raw_input("upload to Strava? [Y/n] ").strip()
-            if query[0:1].lower() != "n":
-                upload_to_strava(format, filenames)
+        if tracks:
+            filenames = [(gb.exportTrack(track, format, merge = False)) for track in tracks]
+            print 'exported %i tracks to %s' % (len(tracks), format)
+            if gb.apiKey is not None and format in {'tcx','gpx','gpx_ext'}:
+                query = raw_input("upload to Strava? [Y/n] ").strip()
+                if query[0:1].lower() != "n":
+                    upload_to_strava(format, filenames)
 
     elif command == "e":
         print "Download Waypoints"
@@ -170,7 +163,7 @@ What do you want to do?\n\
         print "Delete all Waypoints"
         warning = raw_input("WARNING DELETING ALL WAYPOINTS").strip()
         results = gb.formatWaypoints()
-        print 'Formatted all Waypoints:', results
+        print 'Deleted all Waypoints:', results
     
     elif command == "i":
         unit = gb.getUnitInformation()

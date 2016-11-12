@@ -621,14 +621,13 @@ class GB500(SerialInterface):
         raise NotImplemented('This is an abstract method, please instantiate a subclass')
     
     def getAllTrackIds(self):
-        allTracks = self.getTracklist()
-        return [track.pointer for track in allTracks]
+       allTracks = self.getTracklist()
+       return [track.pointer for track in allTracks]
     
     def getAllTracks(self):
-	tracks = []
-        for trackPtr in self.getAllTrackIds():
-             tracks.append(self.getTrack(trackPtr))
-	return tracks
+        headers = self.getTracklist()
+        if headers:
+            return self.getTrack(header.trackPtr for header in headers)
     
     @serial_required
     def getTrack(self, trackPtr):
@@ -674,7 +673,7 @@ class GB500(SerialInterface):
         response = self._readSloppy()
         
         if response == '79000000':
-            self.logger.info('format tracks successful')
+            self.logger.debug('format tracks successful')
             return True
         else:
             self.logger.error('format not successful')
@@ -819,7 +818,7 @@ class GB580(GB500):
             self.logger.info('%i tracks found' % len(trackHeaders))    
             return trackHeaders    
         else:
-            self.logger.info('no tracks Utilities.hex2decfound') 
+            self.logger.info('no tracks found') 
             pass
         
     @serial_required
