@@ -8,10 +8,12 @@
 Other Tasks for gb580 script:
 1.) fix menu so that it reads the tracklist once and keeps it in a variable listing each call to choose() instead of querying each time - if there's only 1 track export it without prompting.
 2.) add color
-3.) fix laps
+3.) fix laps DONE
 4.) Review CLI params and test this functionality.
 5.) persist altitude on export option i.e. "with barometer"
 6.) Test with cyclo and timex
+7.) test without any tracks uploaded
+8.) change export to not add speed, cadence, power, HR nodes if no data
 
 - add more extensions to gpx and tcx (fix/finish tcx!) DONE
 - add progress bar and figure out the trackpoint header DONE
