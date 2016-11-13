@@ -473,7 +473,7 @@ class SerialInterface():
         data = Utilities.chr2hex(self.serial.read(3))
         payload = int(data[2:6], 16)
         
-	if payload > 0:
+        if payload > 0:
             for i in range (0, payload):
                 raw += self.serial.read()
 
@@ -619,11 +619,7 @@ class GB500(SerialInterface):
     @serial_required
     def getTracklist(self):
         raise NotImplemented('This is an abstract method, please instantiate a subclass')
-    
-    def getAllTrackIds(self):
-       allTracks = self.getTracklist()
-       return [track.pointer for track in allTracks]
-    
+
     def getAllTracks(self):
         headers = self.getTracklist()
         if headers:
@@ -668,11 +664,12 @@ class GB500(SerialInterface):
     @serial_required
     def formatTracks(self):
         self._writeSerial('formatTracks')
-        #wait long for response
-        self.serial.timeout = 10
+                #wait long for response
+        while True:
+            time.sleep(1)
+            if self.serial.in_waiting  != 0:
+                break
         response = self._read(4)
-        self.serial.timeout = 1
-        
         if response == '79000000':
             self.logger.debug('format tracks successful')
             return True
@@ -704,7 +701,7 @@ class GB500(SerialInterface):
     def importWaypoints(self, **kwargs):
         if 'path' in kwargs:
             filepath = os.path.join(kwargs['path'], 'waypoints.txt')
-        else:    
+        else:
             filepath = Utilities.getAppPrefix('waypoints.txt')
                 
         with open(filepath) as f:
@@ -737,11 +734,13 @@ class GB500(SerialInterface):
     @serial_required
     def formatWaypoints(self):
         self._writeSerial('formatWaypoints')
-        time.sleep(10)
+        while True:
+            time.sleep(1)
+            if self.serial.in_waiting  != 0:
+                break
         response = self._read(4)
-        
         if response == '75000000':
-            self.logger.info('deleted all waypoints')
+            self.logger.debug('deleted all waypoints')
             return True
         else:
             self.logger.error('deleting all waypoints failed')
