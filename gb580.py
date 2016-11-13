@@ -459,13 +459,13 @@ class SerialInterface():
         #except:
         #    raise GB500SerialException
 
-    def _readSloppy(self, size = 2070):
+    def _read(self, size = 2070):
         data = Utilities.chr2hex(self.serial.read(size))
         #self.logger.debug("serial port returned: %s" % data if len(data) < 30 else "%s... (truncated)" % data[:30])
         self.logger.debug("serial port returned: %s" % data)
         return data
 
-    def _readPrecise(self):
+    def _readPayload(self):
 	# find the payload and read the exact number of bytes 1 at a time
 	# much faster than guessing at it and waiting for the timeout
 	# byte by byte improves flow control/buffer overruns in linux	
@@ -490,7 +490,7 @@ class SerialInterface():
         while True:
             tries += 1
             self._writeSerial(command, *args, **kwargs)
-            data = self._readPrecise()
+            data = self._readPayload()
             if data:
                 return data
             else:
@@ -627,8 +627,8 @@ class GB500(SerialInterface):
     def getAllTracks(self):
         headers = self.getTracklist()
         if headers:
-            return self.getTrack(header.trackPtr for header in headers)
-    
+            return [self.getTrack(header.pointer) for header in headers]
+
     @serial_required
     def getTrack(self, trackPtr):
         raise NotImplemented('This is an abstract method, please instantiate a subclass')
@@ -669,8 +669,9 @@ class GB500(SerialInterface):
     def formatTracks(self):
         self._writeSerial('formatTracks')
         #wait long for response
-        time.sleep(10)
-        response = self._readSloppy()
+        self.serial.timeout = 10
+        response = self._read(4)
+        self.serial.timeout = 1
         
         if response == '79000000':
             self.logger.debug('format tracks successful')
@@ -737,7 +738,7 @@ class GB500(SerialInterface):
     def formatWaypoints(self):
         self._writeSerial('formatWaypoints')
         time.sleep(10)
-        response = self._readSloppy()
+        response = self._read(4)
         
         if response == '75000000':
             self.logger.info('deleted all waypoints')
@@ -829,7 +830,7 @@ class GB580(GB500):
         i = 0
         
         while True:
-            data = self._readPrecise()
+            data = self._readPayload()
             time.sleep(0)
             if data != '8A000000':
 
