@@ -408,6 +408,18 @@ def serial_required(function):
             x._disconnectSerial()
     return serial_required_wrapper
 
+def connectToPC_required(function):
+    def connectToPC_required_wrapper(x, *args, **kw):
+        x._connectSerial()
+        test = x._querySerial('0200017879')
+        if test:
+            return function(x, *args, **kw)
+        else:
+            print "Device is unresponsive.  Select 'CONNECT TO PC' from the device menu."
+        x._disconnectSerial()
+
+    return connectToPC_required_wrapper
+
 
 class SerialInterface():
     _sleep = 0
@@ -471,35 +483,25 @@ class SerialInterface():
 	# byte by byte improves flow control/buffer overruns in linux	
         raw = ''
         data = Utilities.chr2hex(self.serial.read(3))
-        payload = int(data[2:6], 16)
-        
-        if payload > 0:
-            for i in range (0, payload):
-                raw += self.serial.read()
+        if data:
+            payload = int(data[2:6], 16)
+            if payload > 0:
+                for i in range (0, payload):
+                    raw += self.serial.read()
 
-	# read the last checksum byte
-        raw += self.serial.read()
-        
-        data += Utilities.chr2hex(raw)
-        self.logger.debug("serial port returned: %s" % data if len(data) < 30 else "%s... (truncated)" % data[:30])
-        #self.logger.debug("serial port returned: %s" % data)
-        return data
-
+            # read the last checksum byte
+            raw += self.serial.read()
+            
+            data += Utilities.chr2hex(raw)
+            self.logger.debug("serial port returned: %s" % data if len(data) < 30 else "%s... (truncated)" % data[:30])
+            #self.logger.debug("serial port returned: %s" % data)
+            return data
+        else:
+            return None
     def _querySerial(self, command, *args, **kwargs):
-        tries = 0
-        while True:
-            tries += 1
-            self._writeSerial(command, *args, **kwargs)
-            data = self._readPayload()
-            if data:
-                return data
-            else:
-                if tries < 2:
-                    self.logger.debug("no data at serial port, retry command #%i" % tries)
-                    time.sleep(self._sleep)
-                    continue
-                else:
-                    raise GB500SerialException
+        self._writeSerial(command, *args, **kwargs)
+        data = self._readPayload()
+        return data
         
     def _diagnostic(self):
         """check if a connection can be established"""
@@ -616,7 +618,7 @@ class GB500(SerialInterface):
             formats.append(e)
         return formats
         
-    @serial_required
+    @connectToPC_required
     def getTracklist(self):
         raise NotImplemented('This is an abstract method, please instantiate a subclass')
 
@@ -657,14 +659,14 @@ class GB500(SerialInterface):
         gpx = GPXParser(track)
         return gpx.tracks
     
-    @serial_required
+    @connectToPC_required
     def setTracks(self, tracks):
         raise NotImplemented('This is an abstract method, please instantiate a subclass')
 
-    @serial_required
+    @connectToPC_required
     def formatTracks(self):
         self._writeSerial('formatTracks')
-                #wait long for response
+        # wait for response
         while True:
             time.sleep(1)
             if self.serial.in_waiting  != 0:
@@ -677,7 +679,7 @@ class GB500(SerialInterface):
             self.logger.error('format not successful')
             return False
         
-    @serial_required
+    @connectToPC_required
     def getWaypoints(self):
         response = self._querySerial('getWaypoints')            
         waypoints = Utilities.chop(response[46:-2], 40) #trim junk 
@@ -714,7 +716,7 @@ class GB500(SerialInterface):
         self.logger.debug('Successfully read %i waypoint(s) from file' % len(waypoints)) 
         return waypoints
     
-    @serial_required
+    @connectToPC_required
     def setWaypoints(self, waypoints):                               
         waypointsConverted = ''.join([hex(waypoint) for waypoint in waypoints])
         numberOfWaypoints = Utilities.swap(Utilities.dec2hex(len(waypoints), 8))
@@ -731,7 +733,7 @@ class GB500(SerialInterface):
             self.logger.error('error uploading waypoints')
             return False
 
-    @serial_required
+    @connectToPC_required
     def formatWaypoints(self):
         self._writeSerial('formatWaypoints')
         while True:
@@ -808,19 +810,22 @@ class GB580(GB500):
     @serial_required
     def getTracklist(self):
         tracklist = self._querySerial('getTracklist')
-        trackHeaders = [] 
-        if len(tracklist) > 8:
-            j=1
-            for hex in Utilities.chop(tracklist[6:-2],48):
-                header = TrackFileHeader().fromHex(j, hex, self.timezone, self.units)
-                j += 1
-                trackHeaders.append(header)
-            self.logger.info('%i tracks found' % len(trackHeaders))    
-            return trackHeaders    
+        if tracklist:
+            trackHeaders = [] 
+            if len(tracklist) > 8:
+                j=1
+                for hex in Utilities.chop(tracklist[6:-2],48):
+                    header = TrackFileHeader().fromHex(j, hex, self.timezone, self.units)
+                    j += 1
+                    trackHeaders.append(header)
+                self.logger.info('%i track(s) found' % len(trackHeaders))    
+                return trackHeaders    
+            else:
+                self.logger.info('no tracks found') 
+                pass
         else:
-            self.logger.info('no tracks found') 
-            pass
-        
+            print "Device is unresponsive.  Select 'CONNECT TO PC' from the device menu."
+
     @serial_required
     def getTrack(self, trackPtr):
         checksum = Utilities.checkersum("05800100%s" % (trackPtr))
@@ -871,7 +876,7 @@ class GB580(GB500):
         self.logger.debug('added 1 track')
         return newtrack
     
-    @serial_required
+    @connectToPC_required
     def setTracks(self, tracks):        
         for track in tracks:
             lapChunk = hex(track)[:72 + (track.lapCount * 44)]
