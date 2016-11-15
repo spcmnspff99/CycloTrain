@@ -435,17 +435,18 @@ class SerialInterface():
     
     def _connectSerial(self):
         """connect via serial interface"""
-        DeviceID = {"580P"          :   "0483:5740",
-                    "cycleTrainer"  :   "0484:5741"
-                            }
-        
-        for value in DeviceID.values()
-            ports = list(list_ports.grep(value))
-            if len(ports) > 0:
-                self.port = ports[0][0]
-                self.logger.debug("USB virtual serial port found on " + self.port)
-                break
-
+        DeviceID = {"Globalsat 580p"          :   "0483:5740",
+                    "Timex Cycle Trainer"     :   "0484:5741"
+                    }
+        # search for the port first based on device ids
+        if self.port is None:
+            for key, value in DeviceID.iteritems():
+                ports = list(list_ports.grep(value))
+                if len(ports) > 0:
+                    self.port = ports[0][0]
+                    self.logger.debug("USB virtual serial port found on " + self.port)
+                    break
+        # didnt find anything fall back to config.ini
         if self.port is None:
             self.port = self.config.get("serial", "comport") 
             self.logger.debug("Virtual serial port not found. Reverting to config.ini: " + self.port)
@@ -675,7 +676,7 @@ class GB500(SerialInterface):
         # wait for response
         while True:
             time.sleep(1)
-            if self.serial.in_waiting  != 0:
+            if self.serial.inWaiting()  != 0:
                 break
         response = self._read(4)
         if response == '79000000':
@@ -744,7 +745,7 @@ class GB500(SerialInterface):
         self._writeSerial('formatWaypoints')
         while True:
             time.sleep(1)
-            if self.serial.in_waiting  != 0:
+            if self.serial.inWaiting()  != 0:
                 break
         response = self._read(4)
         if response == '75000000':
