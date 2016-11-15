@@ -423,7 +423,7 @@ def connectToPC_required(function):
 
 class SerialInterface():
     _sleep = 0
-    _port = ""
+    _port = None
     
     @property
     def port(self):
@@ -435,14 +435,20 @@ class SerialInterface():
     
     def _connectSerial(self):
         """connect via serial interface"""
-        if self.port == "":
-            ports = list(list_ports.grep("0483:5740"))
+        DeviceID = {"580P"          :   "0483:5740",
+                    "cycleTrainer"  :   "0484:5741"
+                            }
+        
+        for value in DeviceID.values()
+            ports = list(list_ports.grep(value))
             if len(ports) > 0:
                 self.port = ports[0][0]
                 self.logger.debug("USB virtual serial port found on " + self.port)
-            else:
-                self.port = self.config.get("serial", "comport")
-                self.logger.debug("Virtual serial port not found. Reverting to config.ini: " + self.port)
+                break
+
+        if self.port is None:
+            self.port = self.config.get("serial", "comport") 
+            self.logger.debug("Virtual serial port not found. Reverting to config.ini: " + self.port)
         try:
             self.serial = serial.Serial(port=self.port, baudrate=self.config.get("serial", "baudrate"), timeout=self.config.getint("serial", "timeout"), xonxoff=0, rtscts=1)
             self.logger.debug("serial connection on " + self.serial.portstr)
