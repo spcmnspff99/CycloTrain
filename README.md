@@ -18,7 +18,7 @@ Required python modules:
 appdirs, pyserial, pytz, requests
 
 Windows:
-You will need to install a [vitural com port driver.](http://www.st.com/en/development-tools/stsw-stm32102.html)
+You will need to install a [vitural com port driver.](http://www1.globalsat.com.tw/products-page_new.php?menu=2&gs_en_product_id=5&gs_en_product_cnt_id=34&img_id=469&product_cnt_folder=4)
 
 Linux:
 you will need to enable the pl2303 kernel module:
