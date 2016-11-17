@@ -594,7 +594,6 @@ class GB500(SerialInterface):
             #downcasting to a specific model
             if product == "GB-580":
                 self.__class__ = GB580
-            #add more lines for cyclo and timex
       
     @serial_required
     def getProductModel(self):
