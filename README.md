@@ -2,7 +2,7 @@ CycloTrain.pl - Portable script for interfacing with the globalsat GB580 family 
 
 Credit where credit is due
 ---------------------------
-This code borrows heavily and was branched from [speigei/gh615](https://github.com/speigei/gh615) fround on github.
+This code borrows heavily and was branched from [speigei/gh615](https://github.com/speigei/gh615) found on github.
 
 Yet another special thanks goes to Globalsat themselves. They provided vital documentation without which this project would have floundered.  Also, I am a big fan of their products.
 
@@ -36,7 +36,7 @@ To access the serial port as a non root user.  You will need to add the user to 
 
 Name of the project
 -------------------
-My goal is to have a script that is OS portable and can interface with my timex cycle trainer 2.0 - cheifly to download tracks from this device and upload them to Strava.  While researching this, I learned that the device is actually manufactured by Globalsat and was originaly marketed as the GB580P.  The device was also licensed by Magelllan and sold as the Magellan/Mio Cyclo 105.  So the name of the project is a hybridization of the various names this device has been assigned under different branding.  I aim to write a script that can work with any of these devices.
+My goal is to have a script that is OS portable and can interface with my timex cycle trainer 2.0 - cheifly to download tracks from this device and upload them to Strava.  While researching this, I learned that the device is actually manufactured by Globalsat and was originaly marketed as the GB580P.  The device was also licensed by Magelllan and sold as the Magellan/Mio Cyclo 105.  So the name of the project is a hybridization of the various names this device has been assigned under different branding.  My orignal goal was to write a script that can interface with all these devices.  However I have learned that the timex cycle trainer is running firmware that roughly equates to vey old firmware on the GB580p.  The data packets are slightly different and there would be substantial changes to the code to add the device.  Thus if you have this device I would suggest using the training peaks device agent software to flash it with [the latest gb580p firmware from glbalsat] (http://www1.globalsat.com.tw/products-page_new.php?menu=2&gs_en_product_id=5&gs_en_product_cnt_id=33&img_id=412&product_cnt_folder=4).  This is what I did while developing this script.  Along with making the device compatible with this script, this will also add some newer features, enhancements, and bug fixes.
 
 Command line
 ------------
@@ -57,7 +57,7 @@ Any directory named "CycloTrain" will need to be created manually.
 
 There is an option to upload the exported file(s) to strava automatically after the track is exported. This requires interfacing with the Strava api3. If this functionality is important to you, you will need to obtain an access token from Strava and place it into the config.ini file under [api_keys]. In this case, it is best to keep the entire config.ini file in the secure location for whichever OS you are running.
 
-To obtain the strava acccess token, I have found the simplest way is to go to [the access token generator](//stravacli-dlenski.rhcloud.com) developed as part of the [stravacli toolset on GitHub](https://github.com/dlenski/stravacli).  If that site is ever down, there is a hack to get an access token manually and without a webserver. Below, I lay out the steps I have taken in the past:
+To obtain the strava acccess token, I have found the simplest way is to go to [the access token generator](https://stravacli-dlenski.rhcloud.com) developed as part of the [stravacli toolset on GitHub](https://github.com/dlenski/stravacli).  If that site is ever down, there is a hack to get an access token manually and without a webserver. Below, I lay out the steps I have taken in the past:
 
 1.) Setup your strava account if you havent already. (The account does not have to be premium.)
 

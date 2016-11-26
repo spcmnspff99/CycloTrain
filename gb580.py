@@ -435,9 +435,10 @@ class SerialInterface():
     
     def _connectSerial(self):
         """connect via serial interface"""
-        DeviceID = {"Globalsat 580p"          :   "0483:5740",
-                    "Timex Cycle Trainer"     :   "0484:5741"
-                    }
+        #DeviceID = {"Globalsat 580p"          :   "0483:5740",
+        #            "Timex Cycle Trainer"     :   "0484:5741"
+        #            }
+        DeviceID = {"Globalsat 580p"          :   "0483:5740"}
         # search for the port first based on device ids
         if self.port is None:
             for key, value in DeviceID.iteritems():
