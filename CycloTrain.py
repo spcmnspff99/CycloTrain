@@ -244,7 +244,7 @@ def main():
         if options.show:
             tracklist()
         elif options.all:
-            print "Export all tracks"
+            print "export all tracks"
             if not format:
                 format = gb.config.get("export", "default")
             tracks = gb.getAllTracks()
@@ -257,7 +257,7 @@ def main():
                     else:
                         print "missing api key or incompatible export format for Strava"
         elif options.new:
-            print "Export newest track"
+            print "export newest track"
             if not format:
                 format = gb.config.get("export", "default")
             headers = gb.getTracklist()
