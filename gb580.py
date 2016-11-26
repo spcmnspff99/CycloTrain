@@ -845,7 +845,8 @@ class GB580(GB500):
             if data != '8A000000':
 
                 #did we get a new train data session ?
-                if len(data) == 136:
+                self.logger.debug(data)
+                if len(data) == 136 or len(data) == 120:
                     self.logger.debug('initalizing new track')
                     #save the old track if it exists and instantiate a new one
                     newtrack = TrackWithLaps().fromHex(data[6:-2], self.timezone)

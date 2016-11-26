@@ -1,6 +1,7 @@
 import glob, os, os.path, sys, time
 import ConfigParser, appdirs
-from optparse import OptionParser
+#from optparse import OptionParser
+from argparse import ArgumentParser
 from gb580 import GB500, ExportFormat
 from Utilities import Utilities
 from stravaUploader import stravaUploader
@@ -23,10 +24,10 @@ def prompt_format():
     print 'available export formats:'
     for format in gb.getExportFormats():
         print "[%s] = %s" % (format.name, format.nicename)
-    
+
     format = raw_input("Choose output format: ").strip()
     return format
-        
+
 def upload_to_strava(format, filenames):
     uploaders = []
     if format == 'gpx_ext':
@@ -35,9 +36,9 @@ def upload_to_strava(format, filenames):
         print 'uploading {} to Strava'.format(os.path.basename(filename)),
         sys.stdout.flush()
         su = stravaUploader()
-        su.apiKey = gb.apiKey 
+        su.apiKey = gb.apiKey
         su.format = format
-        su.filename = filename 
+        su.filename = filename
         su.private = True
         su.upload()
         if su.duplicate:
@@ -52,7 +53,7 @@ def upload_to_strava(format, filenames):
             os.system('setterm -cursor off')
         print 'Strava is processing the file(s) ',
         sys.stdout.flush()
-        while True: 
+        while True:
             if any(uploader.activityId is None for uploader in uploaders):
                 time.sleep(1)
                 print '.',
@@ -71,31 +72,33 @@ def choose():
     print """
 What do you want to do?\n\
 ------TRACKS-------\n\
-[a]  = get list of all tracks\n\
-[b]  = select and export tracks (to default format)\n\
-[b?] = select format or [b <format>]\n\
-[c]  = export all tracks (to default format)\n\
-[c?] = select format or [c <format>]\n\
+[l]  = get list of all tracks\n\
+[a]  = export all tracks (to default format)\n\
+[a?] = select format or [c <format>]\n\
+[e]  = select and export tracks (to default format)\n\
+[e?] = select format or [b <format>]\n\
+[n]  = export newest track (to default format)\n\
+[n?] = select format or [n <format>]\n\
 -----WAYPOINTS-----\n\
-[e]  = download waypoints\n\
-[f]  = upload waypoints\n\
+[d]  = download waypoints\n\
+[u]  = upload waypoints\n\
 -----ETC-----------\n\
-[gg] = format tracks\n\
-[hh] = format waypoints\n\
+[X] = format tracks\n\
+[Z] = format waypoints\n\
 [i]  = get device information\n\
 -------------------\n\
 [q] = quit"""
 
     command = raw_input("=>").strip()
-    
-    if command == "a":
+
+    if command == "l":
         print "Getting tracklist"
         tracklist()
-    
-    elif command.startswith("b"):
+
+    elif command.startswith("e"):
         print "Export track"
         headers = tracklist()
-        if headers:        
+        if headers:
             pick = raw_input("enter track index ").strip()
             trackIndex = pick
             try:
@@ -105,16 +108,15 @@ What do you want to do?\n\
             if index > len(headers):
                 raise IndexError
                 index = None
-    
-            if command == "b?":
+
+            if command == "e?":
                 format = prompt_format()
-            elif command.startswith("b "):
-                format = command[2:].strip() 
+            elif command.startswith("e "):
+                format = command[2:].strip()
             else:
                 format = gb.config.get("export", "default")
                 print "FYI: Exporting to default format '%s' (see config.ini)" % format
-            
-            ef = ExportFormat(format)
+
             track = gb.getTrack(headers[index-1].pointer)
             filenames = [(gb.exportTrack(track, format, merge = False))]
             if gb.apiKey is not None and format in {'tcx','gpx','gpx_ext'}:
@@ -122,16 +124,16 @@ What do you want to do?\n\
                 if query[0:1].lower() != "n":
                     upload_to_strava(format, filenames)
 
-    elif command.startswith("c"):
+    elif command.startswith("a"):
         print "Export all tracks"
-        if command == "c?":
+        if command == "a?":
             format = prompt_format()
-        elif command.startswith("c "):
-            format = command[2:].strip() 
+        elif command.startswith("a "):
+            format = command[2:].strip()
         else:
             format = gb.config.get("export", "default")
             print "FYI: Exporting to default format '%s' (see config.ini)" % format
-        
+
         tracks = gb.getAllTracks()
         if tracks:
             filenames = [(gb.exportTrack(track, format, merge = False)) for track in tracks]
@@ -141,26 +143,44 @@ What do you want to do?\n\
                 if query[0:1].lower() != "n":
                     upload_to_strava(format, filenames)
 
-    elif command == "e":
+    elif command.startswith("n"):
+        print "Export newest track"
+        headers = gb.getTracklist()
+        if headers:
+            if command == "n?":
+                format = prompt_format()
+            elif command.startswith("n "):
+                format = command[2:].strip()
+            else:
+                format = gb.config.get("export", "default")
+                print "FYI: Exporting to default format '%s' (see config.ini)" % format
+
+            print 'exporting track from %s' % (headers[-1].date)
+            track = gb.getTrack(headers[-1].pointer)
+            filenames = [(gb.exportTrack(track, format, merge = False))]
+            if gb.apiKey is not None and format in {'tcx','gpx','gpx_ext'}:
+                query = raw_input("upload to Strava? [Y/n] ").strip()
+                if query[0:1].lower() != "n":
+                    upload_to_strava(format, filenames)
+
+    elif command == "d":
         print "Download Waypoints"
-        waypoints = gb.getWaypoints()    
+        waypoints = gb.getWaypoints()
         results = gb.exportWaypoints(waypoints)
         print 'exported Waypoints to', results
-        
-    elif command == "f":
+
+    elif command == "u":
         print "Upload Waypoints"
         waypoints = gb.importWaypoints()        
         results = gb.setWaypoints(waypoints)
         print 'Successfully uploaded %i waypoint(s)' % results
         
-    elif command == "gg":
-        print "Delete all Tracks"
+    elif command == "X":
         warning = raw_input("warning, DELETING ALL TRACKS").strip()
         results = gb.formatTracks()
         print 'Deleted all Tracks:', results
-        
-    elif command == "hh":
-        print "Delete all Waypoints"
+
+    elif command == "Z":
         warning = raw_input("WARNING DELETING ALL WAYPOINTS").strip()
         results = gb.formatWaypoints()
         print 'Deleted all Waypoints:', results
@@ -169,16 +189,16 @@ What do you want to do?\n\
         unit = gb.getUnitInformation()
         print "* %s waypoints on device" % unit['waypoint_count']
         print "* %s trackpoints on device" % unit['trackpoint_count']
-    
-    elif command == "x":
-        print prompt_format()
-    
+
+#    elif command == "x":
+#        print prompt_format()
+
     elif command == "q":
         sys.exit()
-        
+
     else:
         print "whatever"
-    
+
     choose()
 
 
@@ -188,99 +208,76 @@ def main():
         choose()
     #parse command line args
     else:
-        usage = 'usage: %prog arg [options]'
+#        usage = 'usage: %prog arg [options]'
         description = 'Command Line Interface for GB-580 Python interface, for list of args see the README'
-        parser = OptionParser(usage, description = description)
-        #parser.add_option("-a", "--tracklist", help="output a list of all tracks")
-        #parser.add_option("-b", "--download-track")
-        #parser.add_option("-c", "--download-all-tracks")
-        #parser.add_option("-d", "--upload-track")
-        #parser.add_option("-e", "--download-waypoints")
-        #parser.add_option("-f", "--upload-waypoints")  
-        #parser.add_option("-gg","--format-tracks") 
-        #parser.add_option("-h", "--connection-test")
-        #parser.add_option("-i", "--unit-information") 
-        
+        parser = ArgumentParser(description=description)
+        group = parser.add_mutually_exclusive_group()
+        group.add_argument("-l", "--list", help="show a list of all tracks", dest="show", action="store_true")
+        group.add_argument("-a", "--all", help="export all tracks", dest="all", action="store_true")
+        group.add_argument("-n", "--new", help="export newest tracks", dest="new", action="store_true")
+        parser.add_argument("-X", "--delete-tracks", help="delete all tracks", dest="dat", action="store_true")
+        parser.add_argument("-Z", "--delete-waypoints", help="delete all waypoints", dest="daw", action="store_true")
+
         parser.set_defaults(
-            format = "gpx",
             merge  = False,
             input  = None,
             output = None,
         )
-        
-        parser.add_option("-t", "--track", help="a track id",  action="append", dest="tracks", type="int")
-        parser.add_option("-f", "--format", help="the format to export to (default: %s)" % gb.config.get('export','default'), dest="format", choices=[format.name for format in gb.getExportFormats()])
-        parser.add_option("-m", "--merge", help="merge into single file?", dest="merge", action="store_true")
-        parser.add_option("-c", "--com", dest="com",  help="the comport to use")
-        parser.add_option("-v", "--firmware", dest="firmware", choices=["1","2"], help="firmware version of your GH: (1 for old, 2 for new)")
-        
-        
-        parser.add_option("-i", "--input", help="input file(s)", action="append", dest="input")
-        parser.add_option("-o", "--output", help="the path to output to", dest="output")
-        
-        (options, args) = parser.parse_args()
-        
-        if len(args) != 1:
-            parser.error("incorrect number of arguments")
-        
-        #set firmware version
-        if options.firmware:
-            gb.config.set('general', 'firmware', int(options.firmware))
-        
-        #set serial port
-        if options.com:
-            gb.config.set('serial', 'comport', options.com)
+        parser.add_argument("-f", "--format", help="the format to export to (default: %s)" % gb.config.get('export','default'), dest="format", choices=[format.name for format in gb.getExportFormats()])
+        parser.add_argument("-s", "--strava", help="upload to Strava", dest="strava", action="store_true")
+        parser.add_argument("-p", "--com", help="the comport to use", dest="com" )
+
+        parser.add_argument("-i", "--input", help="input file(s)", action="append", dest="input")
+        parser.add_argument("-o", "--output", help="the path to output to", dest="output")
+
+        options = parser.parse_args()
 
         if options.output:
             gb.config.set('export', 'path', options.output)
-            
+
         if options.format:
-            gb.config.set('export', 'default', options.format)
-        
-        if args[0] == "a":
+            format = options.format
+
+        if options.show:
             tracklist()
-            
-        elif args[0] == "b":            
-            if not options.tracks:
-                parser.error("use option '--track' to select track")
-                
-            track = gb.getTrack(options.track)
-            gb.exportTrack(track, gb.config.get('export', 'default'), gb.config.get('export', 'path'), merge = options.merge)
-            
-        elif args[0] == "c":        
+        elif options.all:
+            print "Export all tracks"
+            if not format:
+                format = gb.config.get("export", "default")
             tracks = gb.getAllTracks()
-            for track in tracks:
-                gb.exportTrack(track, gb.config.get('export', 'default'), gb.config.get('export', 'path'), merge = options.merge)
-            
-        elif args[0] == "d":
-            if not options.input:
-                parser.error("use option '--input' to select files")
-            tracks = gb.importTracks(options.input)
-            results = gb.setTracks(tracks)
-        
-        elif args[0] == "e":
-            waypoints = gb.getWaypoints()    
-            results = gb.exportWaypoints(waypoints, path=options.output)
-            
-        elif args[0] == "f":
-            waypoints = gb.importWaypoints(path=options.input[0])
-            results = gb.setWaypoints(waypoints)
-            print 'Imported Waypoints %i' % results
-            
-        elif args[0] == "gg":
+            if tracks:
+                filenames = [(gb.exportTrack(track, format, merge = False)) for track in tracks]
+                print 'exported %i tracks to %s' % (len(tracks), format)
+                if options.strava:
+                    if gb.apiKey is not None and format in {'tcx', 'gpx', 'gpx_ext'}:
+                        upload_to_strava(format, filenames)
+                    else:
+                        print "missing api key or incompatible export format for Strava"
+        elif options.new:
+            print "Export newest track"
+            if not format:
+                format = gb.config.get("export", "default")
+            headers = gb.getTracklist()
+            if headers:
+                print 'exporting track from %s' % (headers[-1].date)
+                track = gb.getTrack(headers[-1].pointer)
+                filenames = [(gb.exportTrack(track, format, merge = False))]
+                print 'exported 1 track to %s' % (format)
+                if options.strava:
+                    if gb.apiKey is not None and format in {'tcx', 'gpx', 'gpx_ext'}:
+                        upload_to_strava(format, filenames)
+                    else:
+                        print "missing api key or incompatible export format for Strava"
+
+        if options.dat:
             warning = raw_input("warning, DELETING ALL TRACKS").strip()
             results = gb.formatTracks()
-            
-        elif args[0] == "hh":
+
+        if options.daw:
             warning = raw_input("warning, DELETING ALL WAYPOINTS").strip()
             results = gb.formatWaypoints()
-                    
-        elif args[0] == "i":
-            return gb.getUnitInformation()
-        
-        else:
-            parser.error("invalid argument, try -h or see README for help")
-    
-        
+
+        print
+
 if __name__ == "__main__":
     main()

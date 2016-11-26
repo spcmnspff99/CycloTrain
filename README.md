@@ -44,8 +44,6 @@ The script remains CLI only - which makes it very fast.  There have been a numbe
 
 Other things
 ------------
-The original gh-615 code was written with a opion parser and commmand line options. That isnt working yet but there are plans for "export the newest track" and "export all tracks" command line options.
-
 With some minor modification and in most cases no modification whatsoever, all the original exports from the gh615 code work - this speaks to the skill of the original coder.  i.e. Nmea sentence, google earth html, etc.
 
 The script is able to detect the virtual serial port automatically and only use the config.ini setting as a fallback.  This makes it particularly nice when switching between linux and windows as you really never have to fuss with config.ini.
