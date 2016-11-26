@@ -157,6 +157,7 @@ What do you want to do?\n\
                 format = gb.config.get("export", "default")
                 print "FYI: Exporting to default format '%s' (see config.ini)" % format
 
+            headers.sort(key=lambda x: x.date)
             print 'exporting track from %s' % (headers[-1].date)
             track = gb.getTrack(headers[-1].pointer)
             filenames = [(gb.exportTrack(track, format, merge = False))]
@@ -261,6 +262,7 @@ def main():
                 format = gb.config.get("export", "default")
             headers = gb.getTracklist()
             if headers:
+                headers.sort(key=lambda x: x.date)
                 print 'exporting track from %s' % (headers[-1].date)
                 track = gb.getTrack(headers[-1].pointer)
                 filenames = [(gb.exportTrack(track, format, merge = False))]
