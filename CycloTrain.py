@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 import glob, os, os.path, sys, time
 import ConfigParser, appdirs
 #from optparse import OptionParser
