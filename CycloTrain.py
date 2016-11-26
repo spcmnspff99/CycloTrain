@@ -39,7 +39,7 @@ def upload_to_strava(format, filenames):
         su.apiKey = gb.apiKey
         su.format = format
         su.filename = filename
-        su.private = True
+        su.private = False
         su.upload()
         if su.duplicate:
             print '- duplicate activity'
