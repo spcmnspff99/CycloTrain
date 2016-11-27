@@ -565,9 +565,13 @@ class GB500(SerialInterface):
         self.timezone = timezone(self.config.get('general', 'timezone')) 
         self.units = self.config.get("general", "units")
         self.apiKey = self.config.get("api_keys", "strava") if self.config.has_option('api_keys', 'strava') else None
+        if self.config.has_option('general', 'logfile'):
+            logfile = self.config.get("general", "logfile")
+        else:
+            logfile = Utilities.getAppPrefix('gb580.log')
 
         #logging http://www.tiawichiresearch.com/?p=31 / http://www.red-dove.com/python_logging.html
-        handler = logging.FileHandler(Utilities.getAppPrefix('gb580.log'), mode='w')        
+        handler = logging.FileHandler(logfile, mode='w')        
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s %(lineno)d %(funcName)s %(message)s')
         handler.setFormatter(formatter)
         handler.setLevel(logging.DEBUG)
