@@ -234,6 +234,7 @@ def main():
         parser.add_argument("-o", "--output", help="the path to output to", dest="output")
 
         options = parser.parse_args()
+        format = gb.config.get("export", "default")
 
         if options.output:
             gb.config.set('export', 'path', options.output)
@@ -245,8 +246,6 @@ def main():
             tracklist()
         elif options.all:
             print "export all tracks"
-            if not format:
-                format = gb.config.get("export", "default")
             tracks = gb.getAllTracks()
             if tracks:
                 filenames = [(gb.exportTrack(track, format, merge = False)) for track in tracks]
@@ -258,8 +257,6 @@ def main():
                         print "missing api key or incompatible export format for Strava"
         elif options.new:
             print "export newest track"
-            if not format:
-                format = gb.config.get("export", "default")
             headers = gb.getTracklist()
             if headers:
                 headers.sort(key=lambda x: x.date)
