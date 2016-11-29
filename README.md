@@ -21,17 +21,19 @@ Windows:
 You will need to install a [vitural com port driver.](http://www1.globalsat.com.tw/products-page_new.php?menu=2&gs_en_product_id=5&gs_en_product_cnt_id=34&img_id=469&product_cnt_folder=4)
 
 Linux:
-you will need to enable the pl2303 kernel module:
+The device seems to work out of the box on most distros. It makes use of the cdc_acm module which should be preeloaded.  If not run this:
 
-		# sudo modprobe pl2303	
+		$ sudo modprobe cdc_acm	
+
+In the past, I have also blacklisted the cdc_acm module and loaded the pl2303 module instead. But this doesnt seem to be necessary.
 
 To access the serial port as a non root user.  You will need to add the user to a specific user group, whichever one owns the device file.  For me that group was uucp.
 
-		# ls -la /dev/tty*
+		$ ls -la /dev/tty*
 		
 			crw-rw---- 1 root uucp 4, 65 Oct 31 19:41 /dev/ttyACM0
 
-		# gpasswd --add username uucp
+		$ sudo gpasswd --add username uucp
 
 
 Name of the project
