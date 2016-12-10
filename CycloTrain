@@ -85,8 +85,8 @@ What do you want to do?\n\
 [d]  = download waypoints\n\
 [u]  = upload waypoints\n\
 -----ETC-----------\n\
-[X] = format tracks\n\
-[Z] = format waypoints\n\
+[X]  = format tracks\n\
+[Z]  = format waypoints\n\
 [i]  = get device information\n\
 -------------------\n\
 [q] = quit"""
