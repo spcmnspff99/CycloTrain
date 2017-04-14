@@ -78,7 +78,7 @@ class Trackpoint(Point):
             self.cadence    = int(Utilities.swap(hex[48:52]), 16)
             self.pwrcadence = int(Utilities.swap(hex[42:56]), 16)
             self.power      = int(Utilities.swap(hex[56:60]), 16)
-            self.temp       = int(Utilities.swap(hex[60:64]), 16)
+            self.temp       = int(Utilities.swap(hex[60:64]), 16)/10.0
             return self
         else:
             raise GB500ParseException(self.__class__.__name__, len(hex), 64)

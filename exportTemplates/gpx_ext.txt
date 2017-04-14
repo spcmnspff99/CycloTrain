@@ -7,6 +7,10 @@ xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
 
+<metadata>
+   <time>$track.trackpoints[0].date.isoformat()</time>
+</metadata>
+
 <% for i, track in enumerate(tracks) %>
 <trk>
 	<number>$i</number>
