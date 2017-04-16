@@ -71,14 +71,14 @@ class Trackpoint(Point):
             self.latitude   = Coordinate().fromHex(Utilities.swap(hex[0:8]))
             self.longitude  = Coordinate().fromHex(Utilities.swap(hex[8:16]))
             self.altitude   = Utilities.hex2signedDec(Utilities.swap(hex[16:20]))
-            self.speed      = int(Utilities.swap(hex[24:32]), 16)/100
+            self.speed      = int(Utilities.swap(hex[24:32]), 16) / 100.0
             self.heartrate  = int(Utilities.swap(hex[32:34]), 16)
             self.interval   = int(Utilities.swap(hex[40:48]), 16)
             #self.interval   = datetime.timedelta(seconds=Utilities.hex2dec(hex[40:48])/10.0)
             self.cadence    = int(Utilities.swap(hex[48:52]), 16)
             self.pwrcadence = int(Utilities.swap(hex[42:56]), 16)
             self.power      = int(Utilities.swap(hex[56:60]), 16)
-            self.temp       = int(Utilities.swap(hex[60:64]), 16)/10.0
+            self.temp       = int(Utilities.swap(hex[60:64]), 16) / 10.0
             return self
         else:
             raise GB500ParseException(self.__class__.__name__, len(hex), 64)
