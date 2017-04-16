@@ -76,9 +76,9 @@ What do you want to do?\n\
 ------TRACKS-------\n\
 [l]  = get list of all tracks\n\
 [a]  = export all tracks (to default format)\n\
-[a?] = select format or [c <format>]\n\
+[a?] = select format or [a <format>]\n\
 [e]  = select and export tracks (to default format)\n\
-[e?] = select format or [b <format>]\n\
+[e?] = select format or [e <format>]\n\
 [n]  = export newest track (to default format)\n\
 [n?] = select format or [n <format>]\n\
 -----WAYPOINTS-----\n\
