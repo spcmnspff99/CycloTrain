@@ -10,7 +10,7 @@
       <Calories TotalCal="$track.calories" /> 
       <Track StartTime="$track.date.isoformat()">
   	  <% for trackpoint in track.trackpoints %>
-        <pt tm="$trackpoint.timeFromStart.seconds" lat="$trackpoint.latitude" lon="$trackpoint.longitude" ele="$trackpoint.altitude" hr="$trackpoint.heartrate" />
+        <pt tm="$trackpoint.timeFromStart.seconds" lat="$trackpoint.latitude" lon="$trackpoint.longitude" ele="$trackpoint.altitude" hr="$trackpoint.heartrate" cadence="$trackpoint.cadence" power="$trackpoint.power" />
 	  <% endfor %>
       </Track>
       
