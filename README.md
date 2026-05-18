@@ -2,13 +2,13 @@ CycloTrain.pl - Portable script for interfacing with the globalsat GB580 family 
 
 Credit where credit is due
 ---------------------------
-This code borrows heavily and was branched from [speigei/gh615](https://github.com/speigei/gh615) found on github.
+This code borrows heavily and was forked from [speigei/gh615](https://github.com/speigei/gh615) found on github.
 
 Yet another special thanks goes to Globalsat themselves. They provided vital documentation without which this project would have floundered.  Also, I am a big fan of their products.
 
-Some concepts were taken from the python stravalib project as far as the correct way to post to the strava API3 using the python requests library. There just isnt enough guidence in the api documentation itself and every other python project out there uploading tracks is using stravalib itslef.  I was reluctant to import starvalib for this project as I only needed the upload feature and didnt need the bloat that comes with the entire api.  It just seemed too big for my little script.
+Some concepts were taken from the python stravalib project as far as the correct way to post to the strava API3 using the python requests library. There just isnt enough guidence in the api documentation itself and every other python project out there uploading tracks is using stravalib itslef.  I was reluctant to import starvalib for this project as I only needed the upload feature and didnt need the bloat that comes with the entire api tool kit.  It just seemed too big for my little script.
 
-This code is licensed under gpl3.
+This code is licensed under apache 2.0.
 
 Requirements
 ------------
