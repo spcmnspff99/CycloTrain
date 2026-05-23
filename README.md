@@ -34,7 +34,7 @@ To access the serial port as a non root user.  You will need to add the user to 
 
 
 Device Compatibility
--------------------_
+--------------------
 The scripts have been tested using the Timex Cycle Trainer 2.0 - but only after flashing the device with the latest Globalsat 580p firmware. After this the device will boot up as the GB-580p. Compatibility with the Magellin/Mio Cyclo 105 is likely but has not been tested. Donor devices are welcome.
 
 | Device | Status | Notes |
@@ -46,36 +46,38 @@ The scripts have been tested using the Timex Cycle Trainer 2.0 - but only after 
 You'll need an old copy of Training Peaks/Timex device agent to flash the firmware.
 
 
-Command line
+Command Line
 ------------
 There have been some speed enhancements during the track download. That and the CLI nature of the script makes it very fast. Also keeping the python in raw script form keeps it portable. There are no plans for GUI.
 
-= Configuration =
+Working woth the prompt:  
+  
+.\VeloSync  
+  
+[l]  = get list of all tracks  
+[a]  = export all tracks (to default format)  
+[a?] = select format or [a <format>]  
+[e]  = select and export tracks (to default format)  
+[e?] = select format or [e <format>]  
+[n]  = export newest track (to default format)  
+[n?] = select format or [n <format>]  
+  
+[d]  = download waypoints  
+[u]  = upload waypoints  
+  
+[X]  = erase all tracks  
+[Z]  = erase all waypoints  
+[i]  = get device information  
+  
+[q] = quit  
 
-Configuration is done via the `config.ini` file
+CLI Parameters:
 
-= Usage =
+.\VeloSync -n tcx  
+.\VeloSync -l  
+.\VeloSync -e2 gzp_ext  
 
-execute with the following arguments:
-
-[l]  = get list of all tracks
-[a]  = export all tracks (to default format)
-[a?] = select format or [a <format>]
-[e]  = select and export tracks (to default format)
-[e?] = select format or [e <format>]
-[n]  = export newest track (to default format)
-[n?] = select format or [n <format>]
------WAYPOINTS-----
-[d]  = download waypoints
-[u]  = upload waypoints
------ETC-----------
-[X]  = erase all tracks
-[Z]  = erase all waypoints
-[i]  = get device information
--------------------
-[q] = quit"""
-
-Other things
+Other Things
 ------------
 The script is able to detect the virtual serial port automatically and only use the config.ini setting as a fallback.  This makes it particularly nice when switching between linux and windows as you really never have to fuss with config.ini.
 
