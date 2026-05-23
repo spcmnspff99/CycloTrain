@@ -420,7 +420,6 @@ def connectToPC_required(function):
 
     return connectToPC_required_wrapper
 
-
 class SerialInterface():
     _sleep = 0
     _port = None
@@ -486,9 +485,10 @@ class SerialInterface():
         return data
 
     def _readPayload(self):
-	# find the payload and read the exact number of bytes 1 at a time
-	# much faster than guessing at it and waiting for the timeout
-	# byte by byte improves flow control/buffer overruns in linux	
+	# Find the payload size and read the exact number of bytes 1 at a time.
+	# This is an order of magnitude speed improvement over the previous method ^
+    # I.e. Grabbing an oversized chunk and waiting for the truncate and timeout.
+	# Also byte by byte improves flow control/buffer overruns in linux	
         raw = ''
         data = Utilities.chr2hex(self.serial.read(3))
         if data:
@@ -506,6 +506,7 @@ class SerialInterface():
             return data
         else:
             return None
+
     def _querySerial(self, command, *args, **kwargs):
         self._writeSerial(command, *args, **kwargs)
         data = self._readPayload()
@@ -523,7 +524,6 @@ class SerialInterface():
             self.logger.info("error establishing serial port connection, please check your config.ini file")
             return False
     
-
 class GB500(SerialInterface):
     """api for Globalsat GB580"""
     
@@ -810,7 +810,6 @@ class GB500(SerialInterface):
             return unit
         else:
             raise GB500ParseException('Unit Information', len(hex), 180)
-            
     
 class GB580(GB500):
     GB500.COMMANDS.update({
