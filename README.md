@@ -73,9 +73,9 @@ Working woth the prompt:
 
 CLI Parameters:
 
-.\VeloSync -n tcx  
+.\VeloSync -n -f tcx  
 .\VeloSync -l  
-.\VeloSync -e2 gzp_ext  
+.\VeloSync -a -f gzp_ext  
 
 Other Things
 ------------
